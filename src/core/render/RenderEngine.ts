@@ -1,4 +1,4 @@
-import { RenderEngineSettings } from "../types/RenderEngine";
+import { RenderEngineSettings } from "../interfaces/RenderEngine";
 import PerformanceMonitor from "../utils/PerformanceMonitor";
 import { version } from "../../../package.json";
 
@@ -41,7 +41,7 @@ export default class RenderEngine {
    * Arranca el bucle de renderizado. Ejecutar dentro del hilo principal ya que necesita acceso al DOM
    */
   public loop(): void {
-    console.log("Starting render loop!");
+    console.log("Starting render loop");
     window.requestAnimationFrame(this._renderFrame.bind(this));
   }
 
@@ -92,7 +92,7 @@ export default class RenderEngine {
     this._context.restore();
   }
 
-  private _clearScreen() {
+  private _clearScreen():void {
     this._context.save();
     this._context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     this._context.restore();

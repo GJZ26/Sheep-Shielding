@@ -1,4 +1,5 @@
-export type EntityType = "player" | "generic" | "sheep";
+export type EntityType = "player" | "generic" | "sheep" | "wolf";
+
 export interface EntityData {
   id: string;
   x: number;
@@ -16,11 +17,12 @@ export abstract class Entity {
   protected _id: string = "dump";
   protected _x: number = 0;
   protected _y: number = 0;
-  protected _width: number = 10;
-  protected _height: number = 10;
+  protected _width: number = 80;
+  protected _height: number = 80;
   protected _speed: number = 1;
   protected _debugColor: string = "yellow";
   protected readonly _type: EntityType = "generic";
+  protected _angle: number = 0;
 
   constructor() {
     this._id = Entity.generateID();
@@ -28,7 +30,7 @@ export abstract class Entity {
 
   // source: https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
   public static generateID(): string {
-    return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
+    return "10000000".replace(/[018]/g, (c) =>
       (
         +c ^
         (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))

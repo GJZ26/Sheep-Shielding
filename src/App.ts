@@ -14,8 +14,10 @@ const renderEngine = new RenderEngine({
 
 const entityManager = new EntityManager();
 
-console.log(entityManager.invoke("player"));
 console.log(entityManager.invoke("sheep"));
+console.log(entityManager.invoke("wolf"));
+
 console.log(entityManager.data);
 
 renderEngine.loop();
+renderEngine.refresh(entityManager.data);

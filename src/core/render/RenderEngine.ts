@@ -1,8 +1,10 @@
 import { RenderEngineSettings } from "../interfaces/RenderEngine";
 import PerformanceMonitor from "../utils/PerformanceMonitor";
 import { version } from "../../../package.json";
+import { EntityData } from "../interfaces/Entity";
 
 /**
+ * TODO: Cambiar a patrón Singleton
  * Clase encargada de renderizar todos los elementos y entidades en el elemeto Canvas generado.
  */
 export default class RenderEngine {
@@ -12,6 +14,7 @@ export default class RenderEngine {
   private _debug: boolean = false;
   private _version: string = version;
   private _appName: string;
+  private _entities: EntityData[] = [];
 
   public constructor(options: RenderEngineSettings) {
     console.log("Initializing Render Engine");
@@ -28,6 +31,7 @@ export default class RenderEngine {
 
     RenderEngine.stylize(this._canvasElement, options.backgroundColor);
   }
+
   public static stylize(element: HTMLElement, backgroundColor: string): void {
     element.style.margin = "0";
     element.style.padding = "0";
@@ -43,6 +47,10 @@ export default class RenderEngine {
   public loop(): void {
     console.log("Starting render loop");
     window.requestAnimationFrame(this._renderFrame.bind(this));
+  }
+
+  public refresh(entities: EntityData[]) {
+    this._entities = entities;
   }
 
   private _resize(width: number, heigh: number): void {
@@ -70,16 +78,34 @@ export default class RenderEngine {
 
   private _renderFrame(): void {
     this._clearScreen();
-    if (this._debug) {
-      if (this._performancer) {
-        this._drawText(
-          `${new Date().toLocaleString("es")}\n\n${
-            this._appName
-          }\n${this._performancer.getFPS()} FPS\n v.${this._version}`
+
+    this._entities.forEach((entity) => {
+      this._context.save();
+      if (this._debug) {
+        this._context.strokeStyle = entity.color;
+        this._context.strokeRect(
+          entity.x,
+          entity.y,
+          entity.width,
+          entity.height
         );
       }
-    }
+      this._context.restore();
+    });
+
+    this._renderDebugData();
     window.requestAnimationFrame(this._renderFrame.bind(this));
+  }
+
+  private _renderDebugData(): void {
+    if (!this._debug) return;
+    if (this._performancer) {
+      this._drawText(
+        `${new Date().toLocaleString("es")}\n\n${
+          this._appName
+        }\n${this._performancer.getFPS()} FPS\n v.${this._version}`
+      );
+    }
   }
 
   private _drawText(text: string): void {
@@ -92,7 +118,7 @@ export default class RenderEngine {
     this._context.restore();
   }
 
-  private _clearScreen():void {
+  private _clearScreen(): void {
     this._context.save();
     this._context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     this._context.restore();

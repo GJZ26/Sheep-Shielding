@@ -107,7 +107,9 @@ export default class RenderEngine {
       this._drawText(
         `[Canonical Pos]\nx: ${entity.canonical_position.x.toFixed(
           2
-        )}, y:${entity.canonical_position.y.toFixed(2)}`,
+        )}, y:${entity.canonical_position.y.toFixed(2)}\n[Render Pos]\nx: ${entity.x.toFixed(
+          2
+        )}, y:${entity.y.toFixed(2)}`,
         entity.x + entity.width + 3,
         entity.y - 10,
         undefined,

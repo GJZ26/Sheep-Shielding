@@ -12,7 +12,7 @@ export interface Location {
 export class Player extends Entity {
   protected _debugColor: string = "#49ff00";
   protected readonly _type: EntityType = "player";
-  protected _x: number = 200;
+  protected _x: number = 700;
   protected _y: number = 200;
 
   constructor() {
@@ -20,7 +20,6 @@ export class Player extends Entity {
   }
 
   public captureKey(key: string, type: KeyEventType) {
-    
     if (!this._isMoving && type == "down" && key == "w") {
       this._isMoving = true;
     }
@@ -37,5 +36,9 @@ export class Player extends Entity {
         target.x - (display.x + display.width / 2)
       ) + 1.5708; // + 90 deg
     return this._angle;
+  }
+
+  public move() {
+    this._move();
   }
 }

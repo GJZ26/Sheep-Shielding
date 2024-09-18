@@ -1,9 +1,4 @@
-import {
-  Entity,
-  EntityData,
-  EntityType,
-  KeyEventType,
-} from "../interfaces/Entity";
+import { EntityData, InvokableEntity, KeyEventType } from "../interfaces/Entity";
 import { DisplayInfo } from "../interfaces/RenderEngine";
 import { Location, Player } from "./Player";
 import { Sheep } from "./Sheep";
@@ -13,23 +8,24 @@ import { Wolf } from "./Wolf";
  * Representa todas las entidades creadas en el mundo
  */
 export class EntityManager {
-  private _entitiesList: Entity[] = [];
+  private _sheepList: Sheep[] = [];
+  private _wolves: Wolf[] = [];
   private _player: Player;
 
   constructor() {
     this._player = new Player();
   }
 
-  public invoke(type: EntityType): string {
+  public invoke(type: InvokableEntity): string {
     if (type == "sheep") {
       const sheep = new Sheep();
-      this._entitiesList.push(sheep);
+      this._sheepList.push(sheep);
       return sheep.id;
     }
 
     if (type == "wolf") {
       const wolf = new Wolf();
-      this._entitiesList.push(wolf);
+      this._wolves.push(wolf);
       return wolf.id;
     }
 
@@ -41,7 +37,8 @@ export class EntityManager {
 
   public get data(): EntityData[] {
     return [
-      ...this._entitiesList.map((entity) => entity.data),
+      ...this._wolves.map((wolf) => wolf.data),
+      ...this._sheepList.map((sheep) => sheep.data),
       this._player.data,
     ];
   }
@@ -56,8 +53,11 @@ export class EntityManager {
 
   public step() {
     this._player.move();
-    this._entitiesList.forEach((_) => {
-      // entity.move();
+    this._sheepList.forEach((sheep) => {
+      sheep.think([this._player.data]);
+    });
+    this._wolves.forEach((wolf) => {
+      wolf.think(this._sheepList.map((sheep) => sheep.data));
     });
   }
 }

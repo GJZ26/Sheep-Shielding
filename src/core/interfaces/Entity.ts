@@ -1,4 +1,6 @@
-export type EntityType = "player" | "generic" | "sheep" | "wolf";
+export type NoInvokableEntity = "player"  | "generic";
+export type InvokableEntity = "sheep"  | "wolf"
+export type EntityType = NoInvokableEntity | InvokableEntity
 export type KeyEventType = "up" | "down";
 
 export interface EntityData {
@@ -69,7 +71,7 @@ export abstract class Entity {
     return this._type;
   }
 
-  public move(): void {
+  protected _move(): void {
     if (!this._isMoving) return;
     this._y =
       this._y +

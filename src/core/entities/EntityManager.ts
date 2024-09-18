@@ -1,5 +1,11 @@
-import { Entity, EntityData, EntityType } from "../interfaces/Entity";
-import { Player } from "./Player";
+import {
+  Entity,
+  EntityData,
+  EntityType,
+  KeyEventType,
+} from "../interfaces/Entity";
+import { DisplayInfo } from "../interfaces/RenderEngine";
+import { Location, Player } from "./Player";
 import { Sheep } from "./Sheep";
 import { Wolf } from "./Wolf";
 
@@ -38,5 +44,20 @@ export class EntityManager {
       ...this._entitiesList.map((entity) => entity.data),
       this._player.data,
     ];
+  }
+
+  public followCursorPlayer(cursor: Location, display: DisplayInfo): number {
+    return this._player.calculateAngle(cursor, display);
+  }
+
+  public captureKey(key: string, type: KeyEventType): void {
+    this._player.captureKey(key, type);
+  }
+
+  public step() {
+    this._player.move();
+    this._entitiesList.forEach((_) => {
+      // entity.move();
+    });
   }
 }

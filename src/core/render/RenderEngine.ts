@@ -25,7 +25,7 @@ export default class RenderEngine {
     this._context = this._canvasElement.getContext("2d")!;
     this._appName = options.appTitle;
 
-    this._autoResizer();
+    this.resize(window.innerWidth - 1, window.innerHeight - 1);
     this._inject(options.target, options.backgroundColor);
     this._changePageTitle(options.appTitle);
 
@@ -49,21 +49,13 @@ export default class RenderEngine {
     window.requestAnimationFrame(this._renderFrame.bind(this));
   }
 
-  public refresh(entities: EntityData[]) {
+  public render(entities: EntityData[]) {
     this._entities = entities;
   }
 
-  private _resize(width: number, heigh: number): void {
+  public resize(width: number, heigh: number): void {
     this._canvasElement.width = width;
     this._canvasElement.height = heigh;
-  }
-
-  private _autoResizer(): void {
-    this._resize(window.innerWidth - 1, window.innerHeight - 1);
-
-    window.addEventListener("resize", () => {
-      this._resize(window.innerWidth - 1, window.innerHeight - 1);
-    });
   }
 
   private _changePageTitle(title: string): void {
@@ -80,17 +72,7 @@ export default class RenderEngine {
     this._clearScreen();
 
     this._entities.forEach((entity) => {
-      this._context.save();
-      if (this._debug) {
-        this._context.strokeStyle = entity.color;
-        this._context.strokeRect(
-          entity.x,
-          entity.y,
-          entity.width,
-          entity.height
-        );
-      }
-      this._context.restore();
+      this._renderEntityDebugData(entity);
     });
 
     this._renderDebugData();
@@ -108,12 +90,66 @@ export default class RenderEngine {
     }
   }
 
-  private _drawText(text: string): void {
+  private _renderEntityDebugData(entity: EntityData): void {
     this._context.save();
-    this._context.fillStyle = "white";
-    this._context.font = "bold 12px monospace";
+    if (this._debug) {
+      this._context.strokeStyle = entity.color;
+      this._context.strokeRect(entity.x, entity.y, entity.width, entity.height);
+      this._drawText(
+        `[${entity.id}]:[${entity.type}]`,
+        entity.x - 8,
+        entity.y + entity.height - 5,
+        undefined,
+        entity.color,
+        10,
+        false
+      );
+      this._drawText(
+        `[Canonical Pos]\nx: ${entity.canonical_position.x.toFixed(
+          2
+        )}, y:${entity.canonical_position.y.toFixed(2)}`,
+        entity.x + entity.width + 3,
+        entity.y - 10,
+        undefined,
+        entity.color,
+        10,
+        false
+      );
+      this._context.beginPath();
+      this._context.moveTo(
+        entity.x + entity.width / 2,
+        entity.y + entity.height / 2
+      );
+      this._context.lineTo(
+        entity.x + entity.width / 2 + 20 * Math.sin(entity.angle),
+        entity.y +
+          entity.height / 2 +
+          20 * Math.cos(entity.angle - 2 * ((90 * Math.PI) / 180))
+      );
+      this._context.stroke();
+    }
+    this._context.restore();
+  }
+
+  private _drawText(
+    text: string,
+    x: number = 10,
+    y: number = 0,
+    maxWidth: number = 600,
+    color: string = "white",
+    fontSize: number = 12,
+    bold: boolean = true
+  ): void {
+    this._context.save();
+    this._context.fillStyle = color;
+    this._context.font = `${bold ? "bold " : ""}${fontSize}px monospace`;
     text.split("\n").map((line, index) => {
-      this._context.fillText(line.trim(), 10, 12 * (index + 1) + 5, 600);
+      this._context.fillText(
+        line.trim(),
+        x,
+        y + (12 * (index + 1) + 5),
+        maxWidth
+      );
     });
     this._context.restore();
   }

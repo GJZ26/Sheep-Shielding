@@ -44,6 +44,7 @@ export class EntityManager {
     return [
       ...this._wolves.map((wolf) => wolf.data),
       ...this._sheepList.map((sheep) => sheep.data),
+      ...this._player.bullets,
       this._player.data,
     ];
   }
@@ -66,6 +67,9 @@ export class EntityManager {
     this._wolves.forEach((wolf) => {
       wolf.think(this._sheepList.map((sheep) => sheep.data));
     });
-    
+  }
+
+  public spawnBullet() {
+    this._player.shoot();
   }
 }

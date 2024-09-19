@@ -1,11 +1,13 @@
 import {
   availableStatuses,
   Entity,
+  EntityData,
   EntityType,
   KeyEventType,
   Position,
 } from "../interfaces/Entity";
 import { DisplayInfo } from "../interfaces/RenderEngine";
+import { Bullet } from "./Bullet";
 
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.
@@ -16,6 +18,8 @@ export class Player extends Entity {
   protected _x: number = 700;
   protected _y: number = 200;
   protected _status: availableStatuses = "freeze";
+  private _maxBullet: number = 3;
+  private _bulletsIvoked: Bullet[] = [];
 
   constructor() {
     super();
@@ -23,26 +27,23 @@ export class Player extends Entity {
 
   public captureKey(key: string, type: KeyEventType) {
     if (type == "down" && key == "KeyW") {
-      console.log("a");
       this._status = "playing";
     }
 
     if (type == "up" && key == "KeyW") {
-      console.log("b");
       this._status = "freeze";
     }
 
     if (key === "ShiftLeft" && type == "down" && this._status === "playing") {
-      console.log("c");
       this._status = "running";
     }
 
     if (key === "ShiftLeft" && type == "up" && this._status === "running") {
-      console.log("d");
       this._status = "playing";
     }
   }
 
+  // Ajustar para usar _turn
   public calculateAngle(target: Position, display: DisplayInfo): void {
     this._angle =
       Math.atan2(
@@ -51,7 +52,28 @@ export class Player extends Entity {
       ) + 1.5708; // + 90 deg
   }
 
+  public get bullets(): EntityData[] {
+    return this._bulletsIvoked.map((bullet) => {
+      return bullet.data;
+    });
+  }
+
+  public shoot(): void {
+    if (this._bulletsIvoked.length < this._maxBullet)
+      this._bulletsIvoked.push(
+        new Bullet(
+          this._x + this._width / 2,
+          this._y + this._height / 2,
+          this._angle
+        )
+      );
+  }
+
   public move() {
+    this._bulletsIvoked = this._bulletsIvoked.filter((bullet) => {
+      bullet.move();
+      return bullet.isAlive; // Mantiene solo las balas vivas
+    });
     this._move();
   }
 }

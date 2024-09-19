@@ -1,5 +1,5 @@
 export type NoInvokableEntity = "player" | "generic";
-export type InvokableEntity = "sheep" | "wolf";
+export type InvokableEntity = "sheep" | "wolf" | "bullet";
 export type EntityType = NoInvokableEntity | InvokableEntity;
 export type KeyEventType = "up" | "down";
 export type availableStatuses = "iddle" | "freeze" | "running" | "playing";
@@ -23,6 +23,7 @@ export interface EntityData {
   };
   angle: number;
   status: availableStatuses;
+  bullets?: EntityData[]
 }
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.

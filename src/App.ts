@@ -29,10 +29,10 @@ renderEngine.loop();
 function loop() {
   entityManager.step();
   renderEngine.render(camera.capture(entityManager.data));
-  requestAnimationFrame(loop)
+  requestAnimationFrame(loop);
 }
 
-requestAnimationFrame(loop)
+requestAnimationFrame(loop);
 
 window.addEventListener("resize", () => {
   renderEngine.resize(window.innerWidth - 1, window.innerHeight - 1);
@@ -62,4 +62,8 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => {
   entityManager.captureKey(e.code, "up");
+});
+
+window.addEventListener("click", () => {
+  entityManager.spawnBullet();
 });

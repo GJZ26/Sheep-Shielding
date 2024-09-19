@@ -94,45 +94,79 @@ export default class RenderEngine {
     this._context.save();
     if (this._debug) {
       this._context.strokeStyle = entity.color;
-      this._context.strokeRect(entity.x, entity.y, entity.width, entity.height);
-      this._drawText(
-        `[${entity.id}]:[${entity.type}]`,
-        entity.x - 8,
-        entity.y + entity.height - 5,
-        undefined,
-        entity.color,
-        10,
-        false
-      );
-      this._drawText(
-        `[Canonical Pos]\nx: ${entity.canonical_position.x.toFixed(
-          2
-        )}, y:${entity.canonical_position.y.toFixed(
-          2
-        )}\n[Render Pos]\nx: ${entity.x.toFixed(2)}, y:${entity.y.toFixed(
-          2
-        )}\nStatus: ${entity.status}\nAngle: ${entity.angle.toFixed(2)}`,
-        entity.x + entity.width + 3,
-        entity.y - 10,
-        undefined,
-        entity.color,
-        10,
-        false
-      );
-      this._context.beginPath();
-      this._context.moveTo(
-        entity.x + entity.width / 2,
-        entity.y + entity.height / 2
-      );
-      this._context.lineTo(
-        entity.x + entity.width / 2 + 20 * Math.sin(entity.angle),
-        entity.y +
-          entity.height / 2 +
-          20 * Math.cos(entity.angle - 2 * ((90 * Math.PI) / 180))
-      );
-      this._context.stroke();
+
+      this._renderGenericEntity(entity);
+      if (entity.type !== "bullet") {
+      } else {
+        this._renderBulletDebug(entity);
+      }
+
+      this._addDebugInfo(entity);
+      this._displayOrientation(entity);
     }
     this._context.restore();
+  }
+
+  private _displayOrientation(entity: EntityData) {
+    this._context.beginPath();
+    this._context.moveTo(
+      entity.x + entity.width / 2,
+      entity.y + entity.height / 2
+    );
+    this._context.lineTo(
+      entity.x + entity.width / 2 + 20 * Math.sin(entity.angle),
+      entity.y +
+        entity.height / 2 +
+        20 * Math.cos(entity.angle - 2 * ((90 * Math.PI) / 180))
+    );
+    this._context.stroke();
+    this._context.closePath();
+  }
+
+  private _renderBulletDebug(entity: EntityData): void {
+    this._context.beginPath();
+    this._context.arc(
+      entity.x + entity.width / 2,
+      entity.y + entity.height / 2,
+      entity.width / 2,
+      0,
+      2 * Math.PI
+    );
+    this._context.stroke();
+    this._context.closePath();
+  }
+
+  private _renderGenericEntity(entity: EntityData): void {
+    this._context.strokeRect(entity.x, entity.y, entity.width, entity.height);
+  }
+
+  private _addDebugInfo(entity: EntityData): void {
+    if (entity.type == "bullet") return;
+    this._drawText(
+      `[${entity.id}]:[${entity.type}]`,
+      entity.x - 8,
+      entity.y + entity.height - 5,
+      undefined,
+      entity.color,
+      10,
+      false
+    );
+
+    this._drawText(
+      `[Canonical Pos]\nx: ${entity.canonical_position.x.toFixed(
+        2
+      )}, y:${entity.canonical_position.y.toFixed(
+        2
+      )}\n[Render Pos]\nx: ${entity.x.toFixed(2)}, y:${entity.y.toFixed(
+        2
+      )}\nStatus: ${entity.status}\nAngle: ${entity.angle.toFixed(2)}`,
+      entity.x + entity.width + 3,
+      entity.y - 10,
+      undefined,
+      entity.color,
+      10,
+      false
+    );
   }
 
   private _drawText(

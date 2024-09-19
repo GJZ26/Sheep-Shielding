@@ -17,6 +17,9 @@ const entityManager = new EntityManager();
 const camera = new Camera();
 
 console.log(entityManager.invoke("sheep"));
+console.log(entityManager.invoke("sheep"));
+console.log(entityManager.invoke("sheep"));
+console.log(entityManager.invoke("wolf"));
 console.log(entityManager.invoke("wolf"));
 
 console.log(entityManager.data);
@@ -54,9 +57,9 @@ window.addEventListener("mousemove", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
-  entityManager.captureKey(e.key, "down");
+  entityManager.captureKey(e.code, "down");
 });
 
 window.addEventListener("keyup", (e) => {
-  entityManager.captureKey(e.key, "up");
+  entityManager.captureKey(e.code, "up");
 });

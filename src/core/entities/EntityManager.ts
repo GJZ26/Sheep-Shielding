@@ -1,6 +1,11 @@
-import { EntityData, InvokableEntity, KeyEventType } from "../interfaces/Entity";
+import {
+  EntityData,
+  InvokableEntity,
+  KeyEventType,
+  Position,
+} from "../interfaces/Entity";
 import { DisplayInfo } from "../interfaces/RenderEngine";
-import { Location, Player } from "./Player";
+import { Player } from "./Player";
 import { Sheep } from "./Sheep";
 import { Wolf } from "./Wolf";
 
@@ -43,8 +48,8 @@ export class EntityManager {
     ];
   }
 
-  public followCursorPlayer(cursor: Location, display: DisplayInfo): number {
-    return this._player.calculateAngle(cursor, display);
+  public followCursorPlayer(cursor: Position, display: DisplayInfo): void {
+    this._player.calculateAngle(cursor, display);
   }
 
   public captureKey(key: string, type: KeyEventType): void {
@@ -53,11 +58,14 @@ export class EntityManager {
 
   public step() {
     this._player.move();
+
     this._sheepList.forEach((sheep) => {
       sheep.think([this._player.data]);
     });
+
     this._wolves.forEach((wolf) => {
       wolf.think(this._sheepList.map((sheep) => sheep.data));
     });
+    
   }
 }

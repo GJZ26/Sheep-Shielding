@@ -7,8 +7,6 @@ import { Bot } from "../interfaces/Bot";
 export class Sheep extends Bot {
   protected _debugColor: string = "#fbff00";
   protected readonly _type: EntityType = "sheep";
-  protected _x: number = 200;
-  protected _y: number = 300;
   protected _speed: number = 3;
 
   constructor() {

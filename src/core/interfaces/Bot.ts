@@ -1,17 +1,25 @@
-import { Entity, EntityData, EntityType } from "./Entity";
+import { availableStatuses, Entity, EntityData, EntityType } from "./Entity";
 
 export class Bot extends Entity {
   protected readonly _targetEntity: EntityType = "player";
+  protected _x: number = Bot.randomIntFromInterval(10, 1500);
+  protected _y: number = Bot.randomIntFromInterval(10, 500);
   protected _x_center: number = this._x + this._width / 2;
   protected _y_center: number = this._y + this._height / 2;
   protected _entityDetectDistance = 300;
   protected _entityDistanceStop = 100;
 
+  protected _status: availableStatuses = "iddle";
+  private _targetRotation: number = 0;
+
   constructor() {
     super();
   }
 
-  protected _turnToNearestEntity(entities: EntityData[]): number {
+  protected _turnToNearestEntity(entities: EntityData[]): {
+    distance: number;
+    nearestEntity: EntityData | undefined;
+  } {
     let shortestDistance = Infinity;
     let nearestEntity = entities.reduce(
       (closest: EntityData | undefined, entity) => {
@@ -37,31 +45,53 @@ export class Bot extends Entity {
       undefined
     );
 
-    if (!nearestEntity) return -1;
+    if (!nearestEntity) return { distance: -1, nearestEntity: undefined };
 
-    this._angle =
-      Math.atan2(
-        this._y - nearestEntity.canonical_position.y,
-        this._x - nearestEntity.canonical_position.x
-      ) - 1.5708; // - 90 degrees
-
-    return shortestDistance; // Retorna la distancia más corta
+    return { distance: shortestDistance, nearestEntity }; // Retorna la distancia más corta
   }
 
   public think(entity: EntityData[]): void {
-    const distance = this._turnToNearestEntity(entity);
+    const { distance, nearestEntity } = this._turnToNearestEntity(entity);
 
     if (
       distance > this._entityDistanceStop &&
       distance < this._entityDetectDistance
     ) {
-      this._isMoving = true;
+      if (this._status !== "running") {
+        this._status = "running";
+      }
+      this._turn({ x: nearestEntity?.x || 0, y: nearestEntity?.y || 0 }, false);
+    } else if (distance < this._entityDistanceStop) {
+      this._status = "freeze";
     } else {
-      this._isMoving = false;
+      if (this._status !== "iddle") {
+        this._status = "iddle";
+      }
     }
 
+    this.iddle();
     this._move();
     this._x_center = this._x + this._width / 2;
     this._y_center = this._y + this._height / 2;
+  }
+
+  protected iddle(): void {
+    if (this._status != "iddle") return;
+
+    if (Math.abs(this._angle - this._targetRotation) < 0.009) {
+      this._targetRotation =
+        Bot.randomIntFromInterval(-90, 90) * (Math.PI / 180) + this._angle;
+    }
+
+    this._smoothRotation();
+  }
+
+  private _smoothRotation(): void {
+    this._angle += (this._targetRotation - this._angle) * 0.1;
+  }
+
+  // source: https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+  protected static randomIntFromInterval(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 }

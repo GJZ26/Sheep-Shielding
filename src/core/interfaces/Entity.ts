@@ -47,6 +47,8 @@ export abstract class Entity {
   protected _angle: number = 0;
   protected _status: availableStatuses = "freeze";
   protected _lives: number = 3;
+  protected _attackCountDown = 1000;
+  private _lastAttack = -1;
 
   constructor() {
     this._id = Entity.generateID();
@@ -107,17 +109,12 @@ export abstract class Entity {
 
   protected _move(): void {
     if (this._status === "freeze" || this._status === "dead") return;
-    this._y =
-      this._y +
-      this._speed *
-        (this._status === "running" ? this._sprintIncrement : 1) *
-        Math.cos(this._angle - 2 * ((90 * Math.PI) / 180)); // No recuerdo el porqué de esta parte alch
-    // source: https://github.com/GJZ26/HideNSeek/blob/main/src/script/Entities/Player.js#L261
-    this._x =
-      this._x +
-      this._speed *
-        (this._status === "running" ? this._sprintIncrement : 1) *
-        Math.sin(this._angle);
+
+    this._y = this._y + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.cos(this._angle 
+                    - 2 * ((90 * Math.PI) / 180)); // No recuerdo el porqué de esta parte alch
+                                                  // source: https://github.com/GJZ26/HideNSeek/blob/main/src/script/Entities/Player.js#L261
+
+    this._x = this._x + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.sin(this._angle);
   }
 
   // Ajustar para usarlo en Bots y Jugador
@@ -136,10 +133,7 @@ export abstract class Entity {
       (closest: Entity | undefined, entity) => {
         const distance = Math.sqrt(
           Math.pow(this._x + this._width / 2 - entity.center_x, 2) +
-            Math.pow(
-              this._y + this._height / 2 - entity.center_y,
-              2
-            )
+            Math.pow(this._y + this._height / 2 - entity.center_y, 2)
         );
 
         if (distance < shortestDistance) {
@@ -149,14 +143,8 @@ export abstract class Entity {
         return distance <
           (closest
             ? Math.sqrt(
-                Math.pow(
-                  this._x + this._width / 2 - closest.center_x,
-                  2
-                ) +
-                  Math.pow(
-                    this._y + this._height / 2 - closest.center_y,
-                    2
-                  )
+                Math.pow(this._x + this._width / 2 - closest.center_x, 2) +
+                  Math.pow(this._y + this._height / 2 - closest.center_y, 2)
               )
             : Infinity)
           ? entity
@@ -178,5 +166,13 @@ export abstract class Entity {
 
   public get isAlive(): boolean {
     return this._status !== "dead";
+  }
+
+  protected attack(target: Entity) {
+    const now = Date.now();
+    if (now - this._lastAttack > this._attackCountDown) {
+      target.hurt();
+      this._lastAttack = now
+    }
   }
 }

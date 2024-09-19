@@ -11,5 +11,4 @@ export class Camera {
   public capture(entities: EntityData[]): EntityData[] {
     return entities;
   }
-  
 }

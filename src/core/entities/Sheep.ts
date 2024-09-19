@@ -1,4 +1,4 @@
-import { EntityType } from "../interfaces/Entity";
+import { Entity, EntityType } from "../interfaces/Entity";
 import { Bot } from "../interfaces/Bot";
 
 /**
@@ -11,5 +11,9 @@ export class Sheep extends Bot {
 
   constructor() {
     super();
+  }
+
+  protected attack(_target: Entity): void {
+      // Sheeps are love!
   }
 }

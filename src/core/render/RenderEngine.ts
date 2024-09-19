@@ -15,6 +15,7 @@ export default class RenderEngine {
   private _version: string = version;
   private _appName: string;
   private _entities: EntityData[] = [];
+  private _entitiesCount?: number;
 
   public constructor(options: RenderEngineSettings) {
     console.log("Initializing Render Engine");
@@ -49,8 +50,12 @@ export default class RenderEngine {
     window.requestAnimationFrame(this._renderFrame.bind(this));
   }
 
-  public render(entities: EntityData[]) {
+  public render(
+    entities: EntityData[],
+    entitiesCount?: number
+  ) {
     this._entities = entities;
+    this._entitiesCount = entitiesCount;
   }
 
   public resize(width: number, heigh: number): void {
@@ -87,7 +92,9 @@ export default class RenderEngine {
           this._appName
         }\n${this._performancer.getFPS()} FPS\n v.${
           this._version
-        }\nRendering: ${this._entities.length}`
+        }\nRendering: ${this._entities.length}\nComputing: ${
+          this._entitiesCount ? this._entitiesCount : "N/A"
+        }`
       );
     }
   }

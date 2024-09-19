@@ -28,7 +28,7 @@ renderEngine.loop();
 
 function loop() {
   entityManager.step();
-  renderEngine.render(camera.capture(entityManager.data));
+  renderEngine.render(camera.capture(entityManager.data),entityManager.size);
   requestAnimationFrame(loop);
 }
 

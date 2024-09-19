@@ -78,4 +78,9 @@ export class Player extends Entity {
 
     this._move();
   }
+
+  public get bulletsInstanced():number{
+    return this._bulletsIvoked.length
+  }
+
 }

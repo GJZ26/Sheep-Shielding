@@ -49,6 +49,12 @@ export class EntityManager {
     ];
   }
 
+  public get size(): number {
+    return (
+      this._sheepList.length + this._wolves.length + (this._player ? 1 + this._player.bulletsInstanced : 0)
+    );
+  }
+
   public followCursorPlayer(cursor: Position, display: DisplayInfo): void {
     this._player.calculateAngle(cursor, display);
   }

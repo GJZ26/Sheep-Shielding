@@ -27,6 +27,7 @@ export class Bot extends Entity {
       this._status = "running";
       this._turn({ x: nearestEntity?.x || 0, y: nearestEntity?.y || 0 }, false);
     } else if (distance < this._entityDistanceStop) {
+      if (nearestEntity) this.attack(nearestEntity);
       this._status = "freeze";
     } else {
       this._status = "iddle";

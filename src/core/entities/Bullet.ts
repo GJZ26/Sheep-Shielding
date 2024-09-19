@@ -12,7 +12,7 @@ export class Bullet extends Entity {
   protected _status: availableStatuses = "running";
   private readonly _initial_x: number;
   private readonly _initial_y: number;
-  private _lifeDistance: number = 400;
+  private _lifeDistance: number = 600;
   protected _speed: number = 10;
 
   constructor(x: number, y: number, angle: number) {
@@ -38,7 +38,7 @@ export class Bullet extends Entity {
 
     if (distance < 70) {
       this._status = "dead";
-      nearestEntity?.hurt();
+      this.attack(nearestEntity!)
     }
 
     this._move();

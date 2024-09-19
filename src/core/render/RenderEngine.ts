@@ -85,7 +85,9 @@ export default class RenderEngine {
       this._drawText(
         `${new Date().toLocaleString("es")}\n\n${
           this._appName
-        }\n${this._performancer.getFPS()} FPS\n v.${this._version}`
+        }\n${this._performancer.getFPS()} FPS\n v.${
+          this._version
+        }\nRendering: ${this._entities.length}`
       );
     }
   }
@@ -159,10 +161,21 @@ export default class RenderEngine {
         2
       )}\n[Render Pos]\nx: ${entity.x.toFixed(2)}, y:${entity.y.toFixed(
         2
-      )}\nStatus: ${entity.status}\nAngle: ${entity.angle.toFixed(2)}`,
+      )}\nStatus: ${entity.status}\n${" ♥".repeat(entity.lives)}`,
       entity.x + entity.width + 3,
       entity.y - 10,
       undefined,
+      entity.color,
+      10,
+      false
+    );
+
+    this._context.textAlign = "right";
+    this._drawText(
+      `[Angle]\n${entity.angle.toFixed(2)}`,
+      entity.x - 5,
+      entity.y - 10,
+      600,
       entity.color,
       10,
       false

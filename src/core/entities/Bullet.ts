@@ -1,5 +1,9 @@
 import { availableStatuses, Entity, EntityType } from "../interfaces/Entity";
+import { Wolf } from "./Wolf";
 
+/**
+ * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.
+ */
 export class Bullet extends Entity {
   protected _type: EntityType = "bullet";
   protected _width: number = 24;
@@ -22,18 +26,21 @@ export class Bullet extends Entity {
     this._angle = angle;
   }
 
-  public get isAlive(): boolean {
-    return this._status !== "freeze";
-  }
-
-  public move() {
-    const distance = Math.sqrt(
+  public move(enemies: Wolf[]) {
+    const selfDistance = Math.sqrt(
       Math.pow(this._x + this._width / 2 - this._initial_x, 2) +
         Math.pow(this._y + this._height / 2 - this._initial_y, 2)
     );
-    if (distance >= this._lifeDistance) {
-      this._status = "freeze";
+    if (selfDistance >= this._lifeDistance) {
+      this._status = "dead";
     }
+    const { distance, nearestEntity } = this._positionOfNearestEntity(enemies);
+
+    if (distance < 70) {
+      this._status = "dead";
+      nearestEntity?.hurt();
+    }
+
     this._move();
   }
 }

@@ -1,4 +1,4 @@
-import { availableStatuses, Entity, EntityData, EntityType } from "./Entity";
+import { availableStatuses, Entity, EntityType } from "./Entity";
 
 export class Bot extends Entity {
   protected readonly _targetEntity: EntityType = "player";
@@ -9,64 +9,27 @@ export class Bot extends Entity {
   protected _entityDetectDistance = 300;
   protected _entityDistanceStop = 100;
 
-  protected _status: availableStatuses = "iddle";
+  protected _status: availableStatuses = "freeze";
   private _targetRotation: number = 0;
 
   constructor() {
     super();
   }
 
-  protected _turnToNearestEntity(entities: EntityData[]): {
-    distance: number;
-    nearestEntity: EntityData | undefined;
-  } {
-    let shortestDistance = Infinity;
-    let nearestEntity = entities.reduce(
-      (closest: EntityData | undefined, entity) => {
-        const distance = Math.sqrt(
-          Math.pow(this._x_center - entity.canonical_position.x, 2) +
-            Math.pow(this._y_center - entity.canonical_position.y, 2)
-        );
-
-        if (distance < shortestDistance) {
-          shortestDistance = distance;
-        }
-
-        return distance <
-          (closest
-            ? Math.sqrt(
-                Math.pow(this._x_center - closest.canonical_position.x, 2) +
-                  Math.pow(this._y_center - closest.canonical_position.y, 2)
-              )
-            : Infinity)
-          ? entity
-          : closest;
-      },
-      undefined
-    );
-
-    if (!nearestEntity) return { distance: -1, nearestEntity: undefined };
-
-    return { distance: shortestDistance, nearestEntity }; // Retorna la distancia más corta
-  }
-
-  public think(entity: EntityData[]): void {
-    const { distance, nearestEntity } = this._turnToNearestEntity(entity);
+  public think(entity: Entity[]): void {
+    if (this._status === "dead") return;
+    const { distance, nearestEntity } = this._positionOfNearestEntity(entity);
 
     if (
       distance > this._entityDistanceStop &&
       distance < this._entityDetectDistance
     ) {
-      if (this._status !== "running") {
-        this._status = "running";
-      }
+      this._status = "running";
       this._turn({ x: nearestEntity?.x || 0, y: nearestEntity?.y || 0 }, false);
     } else if (distance < this._entityDistanceStop) {
       this._status = "freeze";
     } else {
-      if (this._status !== "iddle") {
-        this._status = "iddle";
-      }
+      this._status = "iddle";
     }
 
     this.iddle();

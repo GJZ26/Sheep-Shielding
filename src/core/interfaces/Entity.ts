@@ -2,7 +2,12 @@ export type NoInvokableEntity = "player" | "generic";
 export type InvokableEntity = "sheep" | "wolf" | "bullet";
 export type EntityType = NoInvokableEntity | InvokableEntity;
 export type KeyEventType = "up" | "down";
-export type availableStatuses = "iddle" | "freeze" | "running" | "playing";
+export type availableStatuses =
+  | "iddle"
+  | "freeze"
+  | "running"
+  | "playing"
+  | "dead";
 
 export interface Position {
   x: number;
@@ -23,7 +28,8 @@ export interface EntityData {
   };
   angle: number;
   status: availableStatuses;
-  bullets?: EntityData[]
+  bullets?: EntityData[];
+  lives: number;
 }
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.
@@ -40,6 +46,7 @@ export abstract class Entity {
   protected readonly _type: EntityType = "generic";
   protected _angle: number = 0;
   protected _status: availableStatuses = "freeze";
+  protected _lives: number = 3;
 
   constructor() {
     this._id = Entity.generateID();
@@ -59,6 +66,22 @@ export abstract class Entity {
     return this._id;
   }
 
+  public get x(): number {
+    return this._x;
+  }
+
+  public get y(): number {
+    return this._y;
+  }
+
+  public get center_x(): number {
+    return this._x + this._width / 2;
+  }
+
+  public get center_y(): number {
+    return this._y + this._height / 2;
+  }
+
   public get data(): EntityData {
     return {
       id: this._id,
@@ -69,11 +92,12 @@ export abstract class Entity {
       color: this._debugColor,
       type: this._type,
       canonical_position: {
-        x: this._x + this._width / 2,
-        y: this._y + this._height / 2,
+        x: this.center_x,
+        y: this.center_y,
       },
       angle: this._angle,
       status: this._status,
+      lives: this._lives,
     };
   }
 
@@ -82,7 +106,7 @@ export abstract class Entity {
   }
 
   protected _move(): void {
-    if (this._status === "freeze") return;
+    if (this._status === "freeze" || this._status === "dead") return;
     this._y =
       this._y +
       this._speed *
@@ -101,5 +125,58 @@ export abstract class Entity {
     this._angle =
       Math.atan2(this._y - target.y, this._x - target.x) +
       (inverse ? 1.5708 : -1.5708);
+  }
+
+  protected _positionOfNearestEntity(entities: Entity[]): {
+    distance: number;
+    nearestEntity: Entity | undefined;
+  } {
+    let shortestDistance = Number.POSITIVE_INFINITY;
+    let nearestEntity = entities.reduce(
+      (closest: Entity | undefined, entity) => {
+        const distance = Math.sqrt(
+          Math.pow(this._x + this._width / 2 - entity.center_x, 2) +
+            Math.pow(
+              this._y + this._height / 2 - entity.center_y,
+              2
+            )
+        );
+
+        if (distance < shortestDistance) {
+          shortestDistance = distance;
+        }
+
+        return distance <
+          (closest
+            ? Math.sqrt(
+                Math.pow(
+                  this._x + this._width / 2 - closest.center_x,
+                  2
+                ) +
+                  Math.pow(
+                    this._y + this._height / 2 - closest.center_y,
+                    2
+                  )
+              )
+            : Infinity)
+          ? entity
+          : closest;
+      },
+      undefined
+    );
+
+    if (!nearestEntity)
+      return { distance: shortestDistance, nearestEntity: undefined };
+
+    return { distance: shortestDistance, nearestEntity }; // Retorna la distancia más corta
+  }
+
+  public hurt(): void {
+    this._lives--;
+    if (this._lives <= 0) this._status = "dead";
+  }
+
+  public get isAlive(): boolean {
+    return this._status !== "dead";
   }
 }

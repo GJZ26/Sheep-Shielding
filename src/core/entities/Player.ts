@@ -8,6 +8,7 @@ import {
 } from "../interfaces/Entity";
 import { DisplayInfo } from "../interfaces/RenderEngine";
 import { Bullet } from "./Bullet";
+import { Wolf } from "./Wolf";
 
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.
@@ -69,11 +70,12 @@ export class Player extends Entity {
       );
   }
 
-  public move() {
+  public move(enemies: Wolf[]) {
     this._bulletsIvoked = this._bulletsIvoked.filter((bullet) => {
-      bullet.move();
+      bullet.move(enemies);
       return bullet.isAlive; // Mantiene solo las balas vivas
     });
+
     this._move();
   }
 }

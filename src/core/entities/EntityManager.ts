@@ -58,14 +58,16 @@ export class EntityManager {
   }
 
   public step() {
-    this._player.move();
+    this._player.move(this._wolves);
 
-    this._sheepList.forEach((sheep) => {
-      sheep.think([this._player.data]);
+    this._sheepList = this._sheepList.filter((sheep) => {
+      sheep.think([this._player]);
+      return sheep.isAlive;
     });
 
-    this._wolves.forEach((wolf) => {
-      wolf.think(this._sheepList.map((sheep) => sheep.data));
+    this._wolves = this._wolves.filter((wolf) => {
+      wolf.think(this._sheepList);
+      return wolf.isAlive;
     });
   }
 

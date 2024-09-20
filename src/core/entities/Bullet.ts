@@ -1,5 +1,4 @@
 import { availableStatuses, Entity, EntityType } from "../interfaces/Entity";
-import { Wolf } from "./Wolf";
 
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.
@@ -26,7 +25,7 @@ export class Bullet extends Entity {
     this._angle = angle;
   }
 
-  public move(enemies: Wolf[]) {
+  public move(enemies: Entity[]) {
     const selfDistance = Math.sqrt(
       Math.pow(this._x + this._width / 2 - this._initial_x, 2) +
         Math.pow(this._y + this._height / 2 - this._initial_y, 2)
@@ -34,11 +33,11 @@ export class Bullet extends Entity {
     if (selfDistance >= this._lifeDistance) {
       this._status = "dead";
     }
-    const { distance, nearestEntity } = this._positionOfNearestEntity(enemies);
+    const { nearestEntity } = this._positionOfNearestEntity(enemies);
 
-    if (distance < 70) {
+    if (this._isColliding(nearestEntity)) {
       this._status = "dead";
-      this.attack(nearestEntity!)
+      this._attack(nearestEntity!);
     }
 
     this._move();

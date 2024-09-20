@@ -1,4 +1,4 @@
-import { PerformanceAttributes } from "../interfaces/PerformanceMonitor";
+import { PerformanceAttributes } from "../interfaces/PerformanceMonitorInterface";
 
 export default class PerformanceMonitor {
   private _frame: number = 0;

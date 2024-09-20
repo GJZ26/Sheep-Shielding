@@ -1,4 +1,4 @@
-import { RenderEngineSettings } from "../interfaces/RenderEngine";
+import { RenderEngineSettings } from "../interfaces/RenderEngineInterface";
 import PerformanceMonitor from "../utils/PerformanceMonitor";
 import { version } from "../../../package.json";
 import { EntityData } from "../interfaces/Entity";
@@ -50,10 +50,7 @@ export default class RenderEngine {
     window.requestAnimationFrame(this._renderFrame.bind(this));
   }
 
-  public render(
-    entities: EntityData[],
-    entitiesCount?: number
-  ) {
+  public render(entities: EntityData[], entitiesCount?: number) {
     this._entities = entities;
     this._entitiesCount = entitiesCount;
   }
@@ -150,7 +147,7 @@ export default class RenderEngine {
   }
 
   private _addDebugInfo(entity: EntityData): void {
-    if (entity.type == "bullet") return;
+    if (entity.type == "bullet" || entity.type == "wall") return;
     this._drawText(
       `[${entity.id}]:[${entity.type}]`,
       entity.x - 8,

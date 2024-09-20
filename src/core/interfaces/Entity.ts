@@ -1,5 +1,5 @@
 export type NoInvokableEntity = "player" | "generic";
-export type InvokableEntity = "sheep" | "wolf" | "bullet";
+export type InvokableEntity = "sheep" | "wolf" | "bullet" | "wall";
 export type EntityType = NoInvokableEntity | InvokableEntity;
 export type KeyEventType = "up" | "down";
 export type availableStatuses =
@@ -31,6 +31,7 @@ export interface EntityData {
   bullets?: EntityData[];
   lives: number;
 }
+
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.
  */
@@ -42,25 +43,50 @@ export abstract class Entity {
   protected _height: number = 80;
   protected _speed: number = 5;
   protected _sprintIncrement: number = 1.4;
-  protected _debugColor: string = "yellow";
+  protected _debugColor: string = "white";
   protected readonly _type: EntityType = "generic";
   protected _angle: number = 0;
   protected _status: availableStatuses = "freeze";
   protected _lives: number = 3;
   protected _attackCountDown = 1000;
+
   private _lastAttack = -1;
 
-  constructor() {
+  constructor(x?: number, y?: number, width?: number, height?: number) {
     this._id = Entity.generateID();
+    this._x = x ? x : this._x;
+    this._y = y ? y : this._y;
+    this._width = width ? width : this._width;
+    this._height = height ? height : this._height;
   }
 
   // source: https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
-  public static generateID(): string {
+  private static generateID(): string {
     return "10000000".replace(/[018]/g, (c) =>
       (
         +c ^
         (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))
       ).toString(16)
+    );
+  }
+
+  public static radToDegreeFixed(radian: number): number {
+    let degree = (radian * 180) / Math.PI;
+
+    degree = degree % 360;
+    if (degree < 0) degree += 360;
+
+    return degree;
+  }
+
+  protected static calculateAngleFrom(
+    me: Position,
+    target: Position,
+    inverse: boolean = false
+  ): number {
+    return (
+      Math.atan2(me.y - target.y, me.x - target.x) +
+      (inverse ? 1.5708 : -1.5708)
     );
   }
 
@@ -107,17 +133,43 @@ export abstract class Entity {
     return this._type;
   }
 
+  public get status(): availableStatuses {
+    return this._status;
+  }
+
+  public get height(): number {
+    return this._height;
+  }
+
+  public get width(): number {
+    return this._width;
+  }
+
+  public get isAlive(): boolean {
+    return this._status !== "dead";
+  }
+
+  public hurt(): void {
+    if (this._lives > 0) this._lives--;
+    if (this._lives <= 0) this._status = "dead";
+  }
+
+  public relocate(x: number, y: number): void {
+    this._x = x;
+    this._y = y;
+  }
+
   protected _move(): void {
     if (this._status === "freeze" || this._status === "dead") return;
 
+    this._x = this._x + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.sin(this._angle);
     this._y = this._y + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.cos(this._angle 
                     - 2 * ((90 * Math.PI) / 180)); // No recuerdo el porqué de esta parte alch
                                                   // source: https://github.com/GJZ26/HideNSeek/blob/main/src/script/Entities/Player.js#L261
-
-    this._x = this._x + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.sin(this._angle);
-  }
+}
 
   // Ajustar para usarlo en Bots y Jugador
+  // TODO: Que use el método estático calculateAngleFrom
   protected _turn(target: Position, inverse: boolean = true): void {
     this._angle =
       Math.atan2(this._y - target.y, this._x - target.x) +
@@ -156,23 +208,26 @@ export abstract class Entity {
     if (!nearestEntity)
       return { distance: shortestDistance, nearestEntity: undefined };
 
-    return { distance: shortestDistance, nearestEntity }; // Retorna la distancia más corta
+    return { distance: shortestDistance, nearestEntity };
   }
 
-  public hurt(): void {
-    this._lives--;
-    if (this._lives <= 0) this._status = "dead";
-  }
-
-  public get isAlive(): boolean {
-    return this._status !== "dead";
-  }
-
-  protected attack(target: Entity) {
+  protected _attack(target: Entity) {
     const now = Date.now();
     if (now - this._lastAttack > this._attackCountDown) {
       target.hurt();
-      this._lastAttack = now
+      this._lastAttack = now;
     }
+  }
+
+  protected _isColliding(target?: Entity): boolean {
+    if (!target) return false;
+
+    const isNotColliding =
+      this._x + this._width < target._x || // La entidad 1 está a la izquierda de la entidad 2
+      this._x > target._x + target._width || // La entidad 1 está a la derecha de la entidad 2
+      this._y + this._height < target._y || // La entidad 1 está arriba de la entidad 2
+      this._y > target._y + target._height; // La entidad 1 está abajo de la entidad 2
+
+    return !isNotColliding;
   }
 }

@@ -16,6 +16,7 @@ const renderEngine = new RenderEngine({
 const entityManager = new EntityManager();
 const camera = new Camera();
 
+// console.log(entityManager.invoke("wall"));
 console.log(entityManager.invoke("sheep"));
 console.log(entityManager.invoke("sheep"));
 console.log(entityManager.invoke("sheep"));
@@ -28,7 +29,7 @@ renderEngine.loop();
 
 function loop() {
   entityManager.step();
-  renderEngine.render(camera.capture(entityManager.data),entityManager.size);
+  renderEngine.render(camera.capture(entityManager.data), entityManager.size);
   requestAnimationFrame(loop);
 }
 

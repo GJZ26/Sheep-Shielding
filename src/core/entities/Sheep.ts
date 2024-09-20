@@ -13,7 +13,7 @@ export class Sheep extends Bot {
     super();
   }
 
-  protected attack(_target: Entity): void {
+  protected _attack(_target: Entity): void {
       // Sheeps are love!
   }
 }

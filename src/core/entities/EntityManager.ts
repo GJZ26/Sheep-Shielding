@@ -4,9 +4,10 @@ import {
   KeyEventType,
   Position,
 } from "../interfaces/Entity";
-import { DisplayInfo } from "../interfaces/RenderEngine";
+import { DisplayInfo } from "../interfaces/RenderEngineInterface";
 import { Player } from "./Player";
 import { Sheep } from "./Sheep";
+import { Wall } from "./Wall";
 import { Wolf } from "./Wolf";
 
 /**
@@ -15,10 +16,15 @@ import { Wolf } from "./Wolf";
 export class EntityManager {
   private _sheepList: Sheep[] = [];
   private _wolves: Wolf[] = [];
+  private _obstacules: Wall[] = [];
   private _player: Player;
 
   constructor() {
     this._player = new Player();
+    this._obstacules.push(new Wall(500,250, 100, 100))
+    this._obstacules.push(new Wall(500,400,50,100))
+    this._obstacules.push(new Wall(500,500, 200))
+    this._obstacules.push(new Wall(790,400))
   }
 
   public invoke(type: InvokableEntity): string {
@@ -34,6 +40,12 @@ export class EntityManager {
       return wolf.id;
     }
 
+    if (type == "wall") {
+      const wall = new Wall();
+      this._obstacules.push(wall);
+      return wall.id;
+    }
+
     console.warn(
       `It was not possible to invoke an entity of the type ${type}.`
     );
@@ -42,6 +54,7 @@ export class EntityManager {
 
   public get data(): EntityData[] {
     return [
+      ...this._obstacules.map((wall) => wall.data),
       ...this._wolves.map((wolf) => wolf.data),
       ...this._sheepList.map((sheep) => sheep.data),
       ...this._player.bullets,
@@ -51,7 +64,10 @@ export class EntityManager {
 
   public get size(): number {
     return (
-      this._sheepList.length + this._wolves.length + (this._player ? 1 + this._player.bulletsInstanced : 0)
+      this._sheepList.length +
+      this._wolves.length +
+      (this._player ? 1 + this._player.bulletsInstanced : 0) +
+      this._obstacules.length
     );
   }
 
@@ -64,7 +80,7 @@ export class EntityManager {
   }
 
   public step() {
-    this._player.move(this._wolves);
+    this._player.move([...this._wolves, ...this._obstacules]);
 
     this._sheepList = this._sheepList.filter((sheep) => {
       sheep.think([this._player]);
@@ -75,6 +91,14 @@ export class EntityManager {
       wolf.think(this._sheepList);
       return wolf.isAlive;
     });
+
+    this._obstacules.forEach((wall) =>
+      wall.checkCollision([
+        ...this._wolves, 
+        ...this._sheepList, 
+        this._player
+      ])
+    );
   }
 
   public spawnBullet() {

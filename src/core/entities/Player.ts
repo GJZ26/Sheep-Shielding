@@ -6,9 +6,8 @@ import {
   KeyEventType,
   Position,
 } from "../interfaces/Entity";
-import { DisplayInfo } from "../interfaces/RenderEngine";
+import { DisplayInfo } from "../interfaces/RenderEngineInterface";
 import { Bullet } from "./Bullet";
-import { Wolf } from "./Wolf";
 
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.
@@ -70,7 +69,7 @@ export class Player extends Entity {
       );
   }
 
-  public move(enemies: Wolf[]) {
+  public move(enemies: Entity[]) {
     this._bulletsIvoked = this._bulletsIvoked.filter((bullet) => {
       bullet.move(enemies);
       return bullet.isAlive; // Mantiene solo las balas vivas

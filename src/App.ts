@@ -14,7 +14,11 @@ const renderEngine = new RenderEngine({
 });
 
 const entityManager = new EntityManager();
-const camera = new Camera();
+const camera = new Camera(
+  window.innerWidth - 1,
+  window.innerHeight - 1,
+  "player"
+);
 
 // console.log(entityManager.invoke("wall"));
 console.log(entityManager.invoke("sheep"));
@@ -37,7 +41,7 @@ requestAnimationFrame(loop);
 
 window.addEventListener("resize", () => {
   renderEngine.resize(window.innerWidth - 1, window.innerHeight - 1);
-  // Hacer lo mismo para la cámara!
+  camera.resize(window.innerWidth - 1, window.innerHeight - 1);
 });
 
 window.addEventListener("mousemove", (e) => {

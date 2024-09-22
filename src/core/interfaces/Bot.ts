@@ -1,4 +1,4 @@
-import { availableStatuses, Entity, EntityType } from "./Entity";
+import { availableStatuses, Entity, EntityType, Position } from "./Entity";
 
 export abstract class Bot extends Entity {
   protected readonly _targetEntity: EntityType = "player";
@@ -11,6 +11,9 @@ export abstract class Bot extends Entity {
 
   protected _status: availableStatuses = "freeze";
   private _targetRotation: number = 0;
+  private _lastTimePanicked: number = -1;
+  private _calmCountDown: number = 1000 * 5;
+  private _isPanicked: boolean = false;
 
   constructor() {
     super();
@@ -18,12 +21,15 @@ export abstract class Bot extends Entity {
 
   public think(entity: Entity[]): void {
     if (this._status === "dead") return;
+
+    this._isPanicked =
+      Date.now() - this._lastTimePanicked < this._calmCountDown;
+
     const { distance, nearestEntity } = this._positionOfNearestEntity(entity);
-    const isColliding = this._isColliding(nearestEntity)
-    if (
-      distance < this._entityDetectDistance &&
-      !isColliding
-    ) {
+    const isColliding = this._isColliding(nearestEntity);
+    if (this._isPanicked) {
+      this._status = "running";
+    } else if (distance < this._entityDetectDistance && !isColliding) {
       this._status = "running";
       this._turn({ x: nearestEntity?.x || 0, y: nearestEntity?.y || 0 }, false);
     } else if (isColliding) {
@@ -35,12 +41,10 @@ export abstract class Bot extends Entity {
 
     this.iddle();
     this._move();
-    this._x_center = this._x + this._width / 2;
-    this._y_center = this._y + this._height / 2;
   }
 
   protected iddle(): void {
-    if (this._status != "iddle") return;
+    if (this._status !== "iddle") return;
 
     if (Math.abs(this._angle - this._targetRotation) < 0.009) {
       this._targetRotation =
@@ -50,6 +54,23 @@ export abstract class Bot extends Entity {
     this._smoothRotation();
   }
 
+  protected _move(): void {
+    if (
+      this._isPanicked &&
+      Math.abs(this._angle - this._targetRotation) < 0.009
+    ) {
+      this._targetRotation =
+        Bot.randomIntFromInterval(-90, 90) * (Math.PI / 180) + this._angle;
+    }
+
+    this._smoothRotation();
+
+    const originalSpeedIncrement = this._sprintIncrement;
+    this._sprintIncrement += this._isPanicked ? 1 : 0;
+    super._move();
+    this._sprintIncrement = originalSpeedIncrement;
+  }
+
   private _smoothRotation(): void {
     this._angle += (this._targetRotation - this._angle) * 0.1;
   }
@@ -57,5 +78,25 @@ export abstract class Bot extends Entity {
   // source: https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
   protected static randomIntFromInterval(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+
+  public hurt(origin?: Position): void {
+    super.hurt();
+    if (origin && this.status !== "dead") {
+      this._runAway(origin);
+    }
+  }
+
+  protected _runAway(from: Position): void {
+    this._lastTimePanicked = Date.now();
+    this._targetRotation = Entity.calculateAngleFrom(
+      {
+        x: this.x,
+        y: this.y,
+      },
+      from,
+      true
+    );
+    this._status = "running";
   }
 }

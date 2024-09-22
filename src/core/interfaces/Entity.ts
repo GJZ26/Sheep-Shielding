@@ -149,7 +149,10 @@ export abstract class Entity {
     return this._status !== "dead";
   }
 
-  public hurt(): void {
+  /**
+   * @param _origin variable para uso de subclases de entidad :D
+   */
+  public hurt(_origin?: Position): void {
     if (this._lives > 0) this._lives--;
     if (this._lives <= 0) this._status = "dead";
   }
@@ -166,7 +169,7 @@ export abstract class Entity {
     this._y = this._y + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.cos(this._angle 
                     - 2 * ((90 * Math.PI) / 180)); // No recuerdo el porqué de esta parte alch
                                                   // source: https://github.com/GJZ26/HideNSeek/blob/main/src/script/Entities/Player.js#L261
-}
+  }
 
   // Ajustar para usarlo en Bots y Jugador
   // TODO: Que use el método estático calculateAngleFrom
@@ -214,7 +217,7 @@ export abstract class Entity {
   protected _attack(target: Entity) {
     const now = Date.now();
     if (now - this._lastAttack > this._attackCountDown) {
-      target.hurt();
+      target.hurt({x:this.x,y:this.y});
       this._lastAttack = now;
     }
   }

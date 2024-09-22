@@ -38,7 +38,6 @@ export class Camera {
           cameraBounds.bottom < entity.y || // fuera por abajo
           cameraBounds.top > entity.y + entity.height; // fuera por arriba
 
-        // Ajustar la posición de la entidad si está dentro de la cámara
         if (!isNotColliding) {
           return {
             ...entity,
@@ -47,8 +46,36 @@ export class Camera {
           };
         }
 
-        // Filtrar entidades fuera del área visible
-        return null;
+        if (entity.type === "wall" || entity.type === "bullet") {
+          return null;
+        }
+
+        // Crear una entidad representativa en el borde de la cámara.
+        const bubble: EntityData = {
+          id: "_",
+          x: 
+          entity.x > cameraBounds.right ? (cameraBounds.right - 20 - xDiference) :
+          entity.x < cameraBounds.left - 20 ? (cameraBounds.left - xDiference) :
+          entity.x - xDiference
+          ,
+          y:
+          entity.y > cameraBounds.bottom ? (cameraBounds.bottom - 20 - yDiference) :
+          entity.y < cameraBounds.top - 20 ? (cameraBounds.top - yDiference) :
+          entity.y - yDiference,
+          width: 20,
+          height: 20,
+          color: entity.color,
+          type: "bullet",
+          canonical_position: {
+            x: 0,
+            y: 0,
+          },
+          angle: 0,
+          status: "freeze",
+          lives: 0,
+        };
+
+        return bubble;
       })
       .filter((entity) => entity !== null) as EntityData[];
   }

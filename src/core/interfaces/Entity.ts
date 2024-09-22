@@ -1,4 +1,4 @@
-export type NoInvokableEntity = "player" | "generic";
+export type NoInvokableEntity = "player" | "generic" | "bubble";
 export type InvokableEntity = "sheep" | "wolf" | "bullet" | "wall";
 export type EntityType = NoInvokableEntity | InvokableEntity;
 export type KeyEventType = "up" | "down";
@@ -165,10 +165,17 @@ export abstract class Entity {
   protected _move(): void {
     if (this._status === "freeze" || this._status === "dead") return;
 
-    this._x = this._x + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.sin(this._angle);
-    this._y = this._y + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.cos(this._angle 
-                    - 2 * ((90 * Math.PI) / 180)); // No recuerdo el porqué de esta parte alch
-                                                  // source: https://github.com/GJZ26/HideNSeek/blob/main/src/script/Entities/Player.js#L261
+    this._x =
+      this._x +
+      this._speed *
+        (this._status === "running" ? this._sprintIncrement : 1) *
+        Math.sin(this._angle);
+    this._y =
+      this._y +
+      this._speed *
+        (this._status === "running" ? this._sprintIncrement : 1) *
+        Math.cos(this._angle - 2 * ((90 * Math.PI) / 180)); // No recuerdo el porqué de esta parte alch
+    // source: https://github.com/GJZ26/HideNSeek/blob/main/src/script/Entities/Player.js#L261
   }
 
   // Ajustar para usarlo en Bots y Jugador
@@ -217,7 +224,7 @@ export abstract class Entity {
   protected _attack(target: Entity) {
     const now = Date.now();
     if (now - this._lastAttack > this._attackCountDown) {
-      target.hurt({x:this.x,y:this.y});
+      target.hurt({ x: this.x, y: this.y });
       this._lastAttack = now;
     }
   }

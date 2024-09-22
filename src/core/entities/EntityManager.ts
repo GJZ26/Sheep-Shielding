@@ -11,6 +11,8 @@ import { Wall } from "./Wall";
 import { Wolf } from "./Wolf";
 
 interface MapData {
+  backgroundActive: Dimension[];
+  backgroundInactive: Dimension[];
   obstacles: Dimension[];
   spawner: {
     player?: Dimension;
@@ -35,8 +37,10 @@ export class EntityManager {
   private _obstacules: Wall[] = [];
   private _player: Player;
 
-  private _initialAnimalCount = 5;
-  private _initialEnemyCount = 5;
+  private _initialAnimalCount = 10;
+  private _initialEnemyCount = 10;
+  private _activeBackground: EntityData[] = [];
+  private _inactiveBackground: EntityData[] = [];
 
   constructor() {
     this._player = new Player();
@@ -53,6 +57,46 @@ export class EntityManager {
         "Apparently your map is not valid.\nPlease check that you have declared an spawn point for animals, enemies and players and at least one obstacle."
       );
       return false;
+    }
+
+    for (let backs of source.backgroundActive) {
+      this._activeBackground.push({
+        id: "",
+        x: backs.x,
+        y: backs.y,
+        width: backs.width,
+        height: backs.height,
+        color: "purple",
+        type: "backgroundActive",
+        canonical_position: {
+          x: backs.x + backs.width / 2,
+          y: backs.y + backs.height / 2,
+        },
+        angle: 0,
+        status: "freeze",
+        bullets: undefined,
+        lives: 0,
+      });
+    }
+
+    for (let backs of source.backgroundInactive) {
+      this._inactiveBackground.push({
+        id: "",
+        x: backs.x,
+        y: backs.y,
+        width: backs.width,
+        height: backs.height,
+        color: "purple",
+        type: "backgroundInactive",
+        canonical_position: {
+          x: backs.x + backs.width / 2,
+          y: backs.y + backs.height / 2,
+        },
+        angle: 0,
+        status: "freeze",
+        bullets: undefined,
+        lives: 0,
+      });
     }
 
     source.obstacles.forEach((wall) => {
@@ -114,7 +158,12 @@ export class EntityManager {
   }
 
   public static async readMapFromSVG(source: string): Promise<MapData> {
-    const result: MapData = { obstacles: [], spawner: {} };
+    const result: MapData = {
+      obstacles: [],
+      spawner: {},
+      backgroundActive: [],
+      backgroundInactive: [],
+    };
 
     if (typeof Document === "undefined") {
       console.warn(
@@ -133,6 +182,27 @@ export class EntityManager {
 
       for (let layer of layers) {
         const label = layer.getAttribute("inkscape:label");
+
+        if (label === "Background") {
+          const back = layer.querySelectorAll("rect");
+          back.forEach((rec) => {
+            if (rec.getAttribute("inkscape:label") === "Active") {
+              result.backgroundActive.push({
+                x: rec.x.baseVal.value,
+                y: rec.y.baseVal.value,
+                width: rec.width.baseVal.value,
+                height: rec.height.baseVal.value,
+              });
+            } else if (rec.getAttribute("inkscape:label") === "Inactive") {
+              result.backgroundInactive.push({
+                x: rec.x.baseVal.value,
+                y: rec.y.baseVal.value,
+                width: rec.width.baseVal.value,
+                height: rec.height.baseVal.value,
+              });
+            }
+          });
+        }
 
         if (label === "Walls") {
           const walls = layer.querySelectorAll("rect");
@@ -232,6 +302,8 @@ export class EntityManager {
 
   public get data(): EntityData[] {
     return [
+      ...this._inactiveBackground,
+      ...this._activeBackground,
       ...this._obstacules.map((wall) => wall.data),
       ...this._wolves.map((wolf) => wolf.data),
       ...this._sheepList.map((sheep) => sheep.data),

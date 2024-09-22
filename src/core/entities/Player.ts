@@ -20,7 +20,7 @@ export class Player extends Entity {
   protected _speed: number = 6;
   protected _sprintIncrement: number = 1.6;
   protected _status: availableStatuses = "freeze";
-  private _maxBullet: number = 3;
+  private _maxBullet: number = 10;
   private _bulletsIvoked: Bullet[] = [];
 
   constructor() {
@@ -66,7 +66,12 @@ export class Player extends Entity {
         new Bullet(
           this._x + this._width / 2,
           this._y + this._height / 2,
-          this._angle
+          this._angle,
+          this._status === "freeze"
+            ? 0
+            : this.status === "playing"
+            ? this._speed
+            : this._speed * this._sprintIncrement
         )
       );
   }
@@ -80,8 +85,7 @@ export class Player extends Entity {
     this._move();
   }
 
-  public get bulletsInstanced():number{
-    return this._bulletsIvoked.length
+  public get bulletsInstanced(): number {
+    return this._bulletsIvoked.length;
   }
-
 }

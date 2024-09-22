@@ -1,4 +1,5 @@
 import PerformanceMonitor from "../utils/PerformanceMonitor";
+import { InvokableEntity, NoInvokableEntity } from "./Entity";
 
 export interface DisplayInfo {
   x: number;
@@ -13,4 +14,13 @@ export interface RenderEngineSettings {
   target: HTMLElement;
   performance?: PerformanceMonitor;
   debug?: boolean;
+  frames: Record<NoInvokableEntity | InvokableEntity | "backgroundActive" | "backgroundInactive", spriteAttribute | undefined>;
+}
+
+export interface spriteAttribute {
+  adjustSize: "width" | "height" | "both" | "none";
+  source: string;
+  repeat: boolean;
+  flipable: boolean;
+  image?: HTMLImageElement
 }

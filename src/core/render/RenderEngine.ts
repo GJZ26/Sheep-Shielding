@@ -1,7 +1,14 @@
-import { RenderEngineSettings } from "../interfaces/RenderEngineInterface";
+import {
+  RenderEngineSettings,
+  spriteAttribute,
+} from "../interfaces/RenderEngineInterface";
 import PerformanceMonitor from "../utils/PerformanceMonitor";
 import { version } from "../../../package.json";
-import { EntityData } from "../interfaces/Entity";
+import {
+  EntityData,
+  InvokableEntity,
+  NoInvokableEntity,
+} from "../interfaces/Entity";
 
 /**
  * TODO: Cambiar a patrón Singleton
@@ -16,9 +23,20 @@ export default class RenderEngine {
   private _appName: string;
   private _entities: EntityData[] = [];
   private _entitiesCount?: number;
+  private _sprites: RenderEngineSettings["frames"] = {
+    generic: undefined,
+    sheep: undefined,
+    wolf: undefined,
+    bullet: undefined,
+    wall: undefined,
+    player: undefined,
+    bubble: undefined,
+    backgroundActive: undefined,
+    backgroundInactive: undefined,
+  };
 
   public constructor(options: RenderEngineSettings) {
-    console.log("Initializing Render Engine");
+    console.log("Inicializando el motor de renderizado");
 
     this._canvasElement = document.createElement("canvas");
     this._performancer = options.performance;
@@ -31,6 +49,55 @@ export default class RenderEngine {
     this._changePageTitle(options.appTitle);
 
     RenderEngine.stylize(this._canvasElement, options.backgroundColor);
+
+    this._loadImages(options.frames).then(() => {
+      console.log("Todas las imágenes se han cargado.");
+    });
+  }
+
+  private _loadImages(
+    frames: Record<
+      NoInvokableEntity | InvokableEntity,
+      spriteAttribute | undefined
+    >
+  ) {
+    const imagePromises = Object.entries(frames).map(([key, attribute]) => {
+      if (!frames) return;
+
+      return new Promise<void>((resolve, reject) => {
+        if (!attribute || !attribute.source) {
+          reject(`Error al cargar el frame "${key}".`);
+          return;
+        }
+
+        const image = new Image();
+        image.src = attribute.source;
+
+        image.onload = () => {
+          const adjustSize = attribute.adjustSize ?? false;
+          const flipable = attribute.flipable ?? false;
+          const repeat = attribute.repeat ?? false;
+
+          this._sprites[key as InvokableEntity | NoInvokableEntity] = {
+            adjustSize: adjustSize,
+            flipable: flipable,
+            repeat: repeat,
+            image: image,
+            source: attribute.source,
+          };
+
+          console.log(`Frame "${key}" cargado.`);
+          resolve();
+        };
+
+        image.onerror = () => {
+          console.warn(`Error al cargar el frame "${key}".`);
+          resolve();
+        };
+      });
+    });
+
+    return Promise.all(imagePromises);
   }
 
   public static stylize(element: HTMLElement, backgroundColor: string): void {
@@ -74,11 +141,99 @@ export default class RenderEngine {
     this._clearScreen();
 
     this._entities.forEach((entity) => {
+      this._renderAsSprite(entity);
       this._renderEntityDebugData(entity);
     });
 
     this._renderDebugData();
     window.requestAnimationFrame(this._renderFrame.bind(this));
+  }
+
+  // TODO: Arreglar esta cagada XD
+  private _renderAsSprite(entity: EntityData): void {
+    if (entity.type == "bubble") {
+      this._context.save();
+      this._context.beginPath();
+      this._context.fillStyle = entity.color;
+      this._context.arc(
+        entity.x + entity.width / 2,
+        entity.y + entity.height / 2,
+        entity.width / 2,
+        0,
+        (360 * Math.PI) / 180
+      );
+      this._context.fill();
+      this._context.closePath();
+      this._context.restore();
+    }
+
+    const currentEntitySprite = this._sprites[entity.type];
+    if (!currentEntitySprite || !currentEntitySprite.image) return;
+
+    this._context.save();
+
+    const entityAngleAsDegree = this._radToDegreeFixed(entity.angle);
+
+    if (
+      currentEntitySprite.flipable &&
+      entityAngleAsDegree > 0 &&
+      entityAngleAsDegree < 180
+    ) {
+      this._context.translate(
+        entity.x + currentEntitySprite.image.width,
+        entity.y
+      );
+      this._context.scale(-1, 1);
+      this._context.drawImage(currentEntitySprite.image, 0, 0);
+    } else if (!currentEntitySprite.repeat) {
+      this._context.drawImage(
+        currentEntitySprite.image,
+        entity.x,
+        entity.y,
+        currentEntitySprite.adjustSize === "width" ||
+          currentEntitySprite.adjustSize === "both"
+          ? entity.width
+          : currentEntitySprite.image.width,
+        currentEntitySprite.adjustSize === "height" ||
+          currentEntitySprite.adjustSize === "both"
+          ? entity.height
+          : currentEntitySprite.image.height
+      );
+    } else {
+      const pattern = this._context.createPattern(
+        currentEntitySprite.image,
+        "repeat"
+      );
+      if (pattern === null) {
+        this._context.restore();
+        return;
+      }
+
+      this._context.fillStyle = pattern;
+      this._context.translate(entity.x, entity.y);
+      this._context.fillRect(0, 0, entity.width, entity.height);
+    }
+
+    this._context.restore();
+
+    this._context.save();
+    if (
+      entity.type === "player" ||
+      entity.type === "wolf" ||
+      entity.type === "sheep"
+    ) {
+      this._context.textAlign = "left";
+      this._drawText(
+        "♥ ".repeat(Math.floor(entity.lives)).trimEnd(),
+        entity.x + 10,
+        entity.y - 20,
+        entity.width,
+        "red",
+        10,
+        true
+      );
+    }
+    this._context.restore();
   }
 
   private _renderDebugData(): void {
@@ -213,5 +368,14 @@ export default class RenderEngine {
     this._context.save();
     this._context.clearRect(0, 0, window.innerWidth, window.innerHeight);
     this._context.restore();
+  }
+
+  private _radToDegreeFixed(radian: number): number {
+    let degree = (radian * 180) / Math.PI;
+
+    degree = degree % 360;
+    if (degree < 0) degree += 360;
+
+    return degree;
   }
 }

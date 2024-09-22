@@ -1,5 +1,14 @@
-export type NoInvokableEntity = "player" | "generic" | "bubble";
-export type InvokableEntity = "sheep" | "wolf" | "bullet" | "wall";
+export type NoInvokableEntity =
+  | "generic"
+  | "backgroundActive"
+  | "backgroundInactive";
+export type InvokableEntity =
+  | "sheep"
+  | "wolf"
+  | "bullet"
+  | "wall"
+  | "player"
+  | "bubble";
 export type EntityType = NoInvokableEntity | InvokableEntity;
 export type KeyEventType = "up" | "down";
 export type availableStatuses =
@@ -39,7 +48,7 @@ export abstract class Entity {
   protected _id: string = "dump";
   protected _x: number = 0;
   protected _y: number = 0;
-  protected _width: number = 80;
+  protected _width: number = 51;
   protected _height: number = 80;
   protected _speed: number = 5;
   protected _sprintIncrement: number = 1.4;

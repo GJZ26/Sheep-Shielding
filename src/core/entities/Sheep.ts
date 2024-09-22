@@ -7,8 +7,9 @@ import { Bot } from "../interfaces/Bot";
 export class Sheep extends Bot {
   protected _debugColor: string = "#fbff00";
   protected readonly _type: EntityType = "sheep";
+  protected _width: number = 96;
 
   protected _attack(_target: Entity): void {
-      // Sheeps are love!
+    // Sheeps are love!
   }
 }

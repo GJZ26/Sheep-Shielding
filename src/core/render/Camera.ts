@@ -46,26 +46,35 @@ export class Camera {
           };
         }
 
-        if (entity.type === "wall" || entity.type === "bullet") {
+        if (
+          entity.type === "wall" ||
+          entity.type === "bullet" ||
+          entity.type === "backgroundActive" ||
+          entity.type === "backgroundInactive" ||
+          entity.type === "generic"
+        ) {
           return null;
         }
-
         // Crear una entidad representativa en el borde de la cámara.
+        const bubbleSize = 15;
         const bubble: EntityData = {
-          id: "_",
-          x: 
-          entity.x > cameraBounds.right ? (cameraBounds.right - 20 - xDiference) :
-          entity.x < cameraBounds.left - 20 ? (cameraBounds.left - xDiference) :
-          entity.x - xDiference
-          ,
+          id: entity.id,
+          x:
+            entity.x > cameraBounds.right
+              ? cameraBounds.right - bubbleSize - xDiference
+              : entity.x < cameraBounds.left - bubbleSize
+              ? cameraBounds.left - xDiference
+              : entity.x + entity.width / 2 - xDiference,
           y:
-          entity.y > cameraBounds.bottom ? (cameraBounds.bottom - 20 - yDiference) :
-          entity.y < cameraBounds.top - 20 ? (cameraBounds.top - yDiference) :
-          entity.y - yDiference,
-          width: 20,
-          height: 20,
+            entity.y > cameraBounds.bottom
+              ? cameraBounds.bottom - bubbleSize - yDiference
+              : entity.y < cameraBounds.top - bubbleSize
+              ? cameraBounds.top - yDiference
+              : entity.y + entity.height / 2 - yDiference,
+          width: bubbleSize,
+          height: bubbleSize,
           color: entity.color,
-          type: "bullet",
+          type: "bubble",
           canonical_position: {
             x: 0,
             y: 0,

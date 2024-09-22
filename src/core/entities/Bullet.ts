@@ -14,7 +14,7 @@ export class Bullet extends Entity {
   private _lifeDistance: number = 1000;
   protected _speed: number = 10;
 
-  constructor(x: number, y: number, angle: number) {
+  constructor(x: number, y: number, angle: number, relativeSpeed:number) {
     super();
     this._x = x - this._width / 2;
     this._y = y - this._height / 2;
@@ -23,6 +23,7 @@ export class Bullet extends Entity {
     this._initial_y = this._y;
 
     this._angle = angle;
+    this._speed += relativeSpeed
   }
 
   public move(enemies: Entity[]) {

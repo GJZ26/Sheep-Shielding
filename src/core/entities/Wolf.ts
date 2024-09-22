@@ -10,10 +10,6 @@ export class Wolf extends Bot {
   protected _speed: number = 1;
   protected _entityDetectDistance: number = 90000;
 
-  constructor() {
-    super();
-  }
-
   protected _runAway(_: Position): void {
     // Los lobos son valientes
   }

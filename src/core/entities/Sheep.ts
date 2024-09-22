@@ -9,10 +9,6 @@ export class Sheep extends Bot {
   protected readonly _type: EntityType = "sheep";
   protected _speed: number = 1;
 
-  constructor() {
-    super();
-  }
-
   protected _attack(_target: Entity): void {
       // Sheeps are love!
   }

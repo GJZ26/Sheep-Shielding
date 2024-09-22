@@ -20,12 +20,16 @@ const camera = new Camera(
   "player"
 );
 
+EntityManager.readMapFromSVG("/map.svg").then((result) => {
+  entityManager.loadMap(result);
+});
+
 // console.log(entityManager.invoke("wall"));
-console.log(entityManager.invoke("sheep"));
-console.log(entityManager.invoke("sheep"));
-console.log(entityManager.invoke("sheep"));
-console.log(entityManager.invoke("wolf"));
-console.log(entityManager.invoke("wolf"));
+// console.log(entityManager.invoke("sheep"));
+// console.log(entityManager.invoke("sheep"));
+// console.log(entityManager.invoke("sheep"));
+// console.log(entityManager.invoke("wolf"));
+// console.log(entityManager.invoke("wolf"));
 
 console.log(entityManager.data);
 

@@ -11,7 +11,7 @@ export class Bullet extends Entity {
   protected _status: availableStatuses = "running";
   private readonly _initial_x: number;
   private readonly _initial_y: number;
-  private _lifeDistance: number = 600;
+  private _lifeDistance: number = 1000;
   protected _speed: number = 10;
 
   constructor(x: number, y: number, angle: number) {

@@ -19,15 +19,38 @@ export class Camera {
    */
   public capture(entities: EntityData[]): EntityData[] {
     const mainEntity = this._findFollowingEntity(entities);
-    const xDiference = mainEntity.x - this._width / 2 + mainEntity.width / 2;
-    const yDiference = mainEntity.y - this._height / 2 + mainEntity.height / 2;
 
-    return entities.map((entity) => {
-      entity.x -= xDiference;
-      entity.y -= yDiference;
+    const xDiference = mainEntity.x + mainEntity.width / 2 - this._width / 2;
+    const yDiference = mainEntity.y + mainEntity.height / 2 - this._height / 2;
 
-      return entity;
-    });
+    const cameraBounds = {
+      left: mainEntity.x + mainEntity.width / 2 - this._width / 2,
+      right: mainEntity.x + mainEntity.width / 2 + this._width / 2,
+      top: mainEntity.y + mainEntity.height / 2 - this._height / 2,
+      bottom: mainEntity.y + mainEntity.height / 2 + this._height / 2,
+    };
+
+    return entities
+      .map((entity) => {
+        const isNotColliding =
+          cameraBounds.right < entity.x || // fuera a la derecha
+          cameraBounds.left > entity.x + entity.width || // fuera a la izquierda
+          cameraBounds.bottom < entity.y || // fuera por abajo
+          cameraBounds.top > entity.y + entity.height; // fuera por arriba
+
+        // Ajustar la posición de la entidad si está dentro de la cámara
+        if (!isNotColliding) {
+          return {
+            ...entity,
+            x: entity.x - xDiference,
+            y: entity.y - yDiference,
+          };
+        }
+
+        // Filtrar entidades fuera del área visible
+        return null;
+      })
+      .filter((entity) => entity !== null) as EntityData[];
   }
 
   public resize(width: number, height: number): void {

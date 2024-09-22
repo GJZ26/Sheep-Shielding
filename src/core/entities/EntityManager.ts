@@ -35,8 +35,8 @@ export class EntityManager {
   private _obstacules: Wall[] = [];
   private _player: Player;
 
-  private _initialAnimalCount = 3;
-  private _initialEnemyCount = 3;
+  private _initialAnimalCount = 5;
+  private _initialEnemyCount = 5;
 
   constructor() {
     this._player = new Player();

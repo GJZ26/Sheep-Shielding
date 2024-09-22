@@ -17,6 +17,8 @@ export class Player extends Entity {
   protected readonly _type: EntityType = "player";
   protected _x: number = 700;
   protected _y: number = 200;
+  protected _speed: number = 6;
+  protected _sprintIncrement: number = 1.6;
   protected _status: availableStatuses = "freeze";
   private _maxBullet: number = 3;
   private _bulletsIvoked: Bullet[] = [];

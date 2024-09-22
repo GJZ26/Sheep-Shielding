@@ -7,7 +7,7 @@ export abstract class Bot extends Entity {
   protected _x_center: number = this._x + this._width / 2;
   protected _y_center: number = this._y + this._height / 2;
   protected _entityDetectDistance = 300;
-  protected _entityDistanceStop = 10;
+  protected _entityDistanceStop = 100;
 
   protected _status: availableStatuses = "freeze";
   private _targetRotation: number = 0;
@@ -35,6 +35,8 @@ export abstract class Bot extends Entity {
     } else if (isColliding) {
       this._attack(nearestEntity!);
       this._status = "freeze";
+    } else if (distance <= this._entityDistanceStop) {
+      this._status = "freeze";
     } else {
       this._status = "iddle";
     }
@@ -55,20 +57,22 @@ export abstract class Bot extends Entity {
   }
 
   protected _move(): void {
-    if (
-      this._isPanicked &&
-      Math.abs(this._angle - this._targetRotation) < 0.009
-    ) {
-      this._targetRotation =
-        Bot.randomIntFromInterval(-90, 90) * (Math.PI / 180) + this._angle;
+    if (this._isPanicked) {
+
+      this._smoothRotation();
+      const originalSpeedIncrement = this._sprintIncrement;
+      this._sprintIncrement += this._isPanicked ? 1 : 0;
+      super._move();
+      this._sprintIncrement = originalSpeedIncrement;
+      
+      if (Math.abs(this._angle - this._targetRotation) < 0.009) {
+        this._targetRotation =
+          Bot.randomIntFromInterval(-90, 90) * (Math.PI / 180) + this._angle;
+      }
+
+    } else {
+      super._move();
     }
-
-    this._smoothRotation();
-
-    const originalSpeedIncrement = this._sprintIncrement;
-    this._sprintIncrement += this._isPanicked ? 1 : 0;
-    super._move();
-    this._sprintIncrement = originalSpeedIncrement;
   }
 
   private _smoothRotation(): void {

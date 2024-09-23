@@ -1,7 +1,21 @@
 import { RenderEngineSettings } from "../../core/interfaces/RenderEngineInterface";
 import PerformanceMonitor from "../../core/utils/PerformanceMonitor";
 
-const GameSetUp: RenderEngineSettings = {
+import playerSprite from '../../assets/entity/player.png'
+import sheepSprite from '../../assets/entity/sheep.png'
+import wolfSprite from '../../assets/entity/wolf.png'
+import cowSprite from '../../assets/entity/cow.png'
+import rabidWolfSprite from '../../assets/entity/rabidWolf.png'
+import rockSprite from '../../assets/entity/rock.png'
+
+import grassTile from '../../assets/terrain/grass.png'
+import wallTile from '../../assets/terrain/rocks.jpg'
+import sandTile from '../../assets/terrain/sand.png'
+import mapSource from '../../assets/level/map.svg'
+
+export const MapSVG = mapSource
+
+export const GameSetUp: RenderEngineSettings = {
   appTitle: "Sheep Shielding",
   backgroundColor: "black",
   target: document.getElementById("game")!,
@@ -14,7 +28,7 @@ const GameSetUp: RenderEngineSettings = {
       adjustSize: "none",
       flipable: true,
       repeat: false,
-      source: "/player.png",
+      source: playerSprite,
     },
     generic: undefined,
     bubble: undefined,
@@ -22,51 +36,49 @@ const GameSetUp: RenderEngineSettings = {
       adjustSize: "none",
       flipable: true,
       repeat: false,
-      source: "/sheep.png",
+      source: sheepSprite,
     },
     wolf: {
       adjustSize: "both",
       flipable: true,
       repeat: false,
-      source: "/wolf.png",
+      source: wolfSprite,
     },
     bullet: {
       adjustSize: "both",
       flipable: false,
       repeat: false,
-      source: "/rock.png",
+      source: rockSprite,
     },
     wall: {
       adjustSize: "none",
       flipable: false,
       repeat: true,
-      source: "/rocks.jpg",
+      source: wallTile,
     },
     backgroundActive: {
       adjustSize: "none",
       flipable: false,
       repeat: true,
-      source: "/grass.png",
+      source: grassTile,
     },
     backgroundInactive: {
       adjustSize: "none",
       flipable: false,
       repeat: true,
-      source: "/sand.png",
+      source: sandTile,
     },
     cow: {
       adjustSize: "none",
       flipable: true,
       repeat: false,
-      source: "/cow.png",
+      source: cowSprite,
     },
     rabidWolf: {
       adjustSize: "none",
       flipable: true,
       repeat: false,
-      source: "/rabidWolf.png",
+      source: rabidWolfSprite,
     },
   },
 };
-
-export default GameSetUp;

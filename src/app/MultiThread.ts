@@ -1,7 +1,7 @@
 import { EntityManager } from "../core/manager/EntityManager";
 import RenderEngine from "../core/render/RenderEngine";
 import FloatScreen from "../core/ui/FloatScreen";
-import GameSetUp from "./.config/GameSetUp";
+import { GameSetUp, MapSVG } from "./.config/GameSetUp";
 
 export default function multiThreadRun(target: HTMLElement) {
   const renderEngine = new RenderEngine(GameSetUp);
@@ -20,7 +20,7 @@ export default function multiThreadRun(target: HTMLElement) {
   
   initializeCameraWorker();
 
-  EntityManager.readMapFromSVG("/map.svg").then((map) => {
+  EntityManager.readMapFromSVG(MapSVG).then((map) => {
     workers.entityManager.postMessage({ type: "loadmap", params: [map] });
     workers.gameManager.postMessage({ type: "invoke", params: [true] });
   });

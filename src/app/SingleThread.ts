@@ -3,7 +3,7 @@ import { GameManager } from "../core/manager/GameManager";
 import { Camera } from "../core/render/Camera";
 import RenderEngine from "../core/render/RenderEngine";
 import FloatScreen from "../core/ui/FloatScreen";
-import GameSetUp from "./.config/GameSetUp";
+import { GameSetUp, MapSVG } from "./.config/GameSetUp";
 
 export default function singleThreadRun(target: HTMLElement) {
   const renderEngine = new RenderEngine(GameSetUp);
@@ -16,7 +16,7 @@ export default function singleThreadRun(target: HTMLElement) {
   const entityManager = new EntityManager();
   const gameManager = new GameManager();
 
-  EntityManager.readMapFromSVG("/map.svg").then((result) => {
+  EntityManager.readMapFromSVG(MapSVG).then((result) => {
     entityManager.loadMap(result);
     entityManager.bulkInvoke(gameManager.invokeCurrentEnemies(true));
     gameManager.ready = true;
@@ -32,15 +32,13 @@ export default function singleThreadRun(target: HTMLElement) {
 
   renderEngine.loop();
   function loop() {
-
     const resume = entityManager.step();
 
     renderEngine.render(camera.capture(entityManager.data), entityManager.size);
 
     const needUpdate = gameManager.updateMatchStatus(resume);
-    
-    if (needUpdate) {
 
+    if (needUpdate) {
       if (!gameManager.isLost) {
         entityManager.bulkInvoke(gameManager.invokeCurrentEnemies(false));
         FloatScreen.Notification(
@@ -50,12 +48,9 @@ export default function singleThreadRun(target: HTMLElement) {
           1500,
           true
         );
-        
       } else {
-
         entityManager.clearAllEntities();
         FloatScreen.StatisticsScreen(target, gameManager.resume);
-
       }
     }
     requestAnimationFrame(loop);

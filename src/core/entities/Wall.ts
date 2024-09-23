@@ -1,4 +1,4 @@
-import { Entity, EntityType } from "../interfaces/Entity";
+import { Entity, EntityType } from "./generic/Entity";
 
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.

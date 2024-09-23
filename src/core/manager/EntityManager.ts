@@ -1,14 +1,10 @@
-import {
-  EntityData,
-  InvokableEntity,
-  KeyEventType,
-  Position,
-} from "../interfaces/Entity";
+import { EntityData, KeyEventType, Position } from "../entities/generic/Entity";
 import { DisplayInfo } from "../interfaces/RenderEngineInterface";
-import { Player } from "./Player";
-import { Sheep } from "./Sheep";
-import { Wall } from "./Wall";
-import { Wolf } from "./Wolf";
+import { Player } from "../entities/Player";
+import { Sheep } from "../entities/Sheep";
+import { Wall } from "../entities/Wall";
+import { Wolf } from "../entities/Wolf";
+import { InvokeEntityData } from "./GameManager";
 
 interface MapData {
   backgroundActive: Dimension[];
@@ -28,6 +24,12 @@ interface Dimension {
   height: number;
 }
 
+export interface EntityStatusResume {
+  animalsAlive: number;
+  enemiesAlive: number;
+  isPlayerAlive: boolean;
+}
+
 /**
  * Representa todas las entidades creadas en el mundo
  */
@@ -37,10 +39,29 @@ export class EntityManager {
   private _obstacules: Wall[] = [];
   private _player: Player;
 
-  private _initialAnimalCount = 10;
-  private _initialEnemyCount = 10;
   private _activeBackground: EntityData[] = [];
   private _inactiveBackground: EntityData[] = [];
+
+  private _playerSpawner: Dimension = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  };
+
+  private _enemySpawner: Dimension = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  };
+
+  private _animalSpawner: Dimension = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  };
 
   constructor() {
     this._player = new Player();
@@ -103,52 +124,37 @@ export class EntityManager {
       this._obstacules.push(new Wall(wall.x, wall.y, wall.width, wall.height));
     });
 
+    this._playerSpawner = {
+      x: source.spawner.player.x,
+      y: source.spawner.player.y,
+      width: source.spawner.player.width,
+      height: source.spawner.player.height,
+    };
+
+    this._animalSpawner = {
+      x: source.spawner.animals.x,
+      y: source.spawner.animals.y,
+      width: source.spawner.animals.width,
+      height: source.spawner.animals.height,
+    };
+
+    this._enemySpawner = {
+      x: source.spawner.enemies.x,
+      y: source.spawner.enemies.y,
+      width: source.spawner.enemies.width,
+      height: source.spawner.enemies.height,
+    };
+
     this._player.relocate(
       EntityManager.randomIntFromInterval(
-        source.spawner.player.x,
-        source.spawner.player.x +
-          source.spawner.player.width -
-          this._player.width
+        this._playerSpawner.x,
+        this._playerSpawner.x + this._playerSpawner.width - this._player.width
       ),
       EntityManager.randomIntFromInterval(
-        source.spawner.player.y,
-        source.spawner.player.y +
-          source.spawner.player.height -
-          this._player.height
+        this._playerSpawner.y,
+        this._playerSpawner.y + this._playerSpawner.height - this._player.height
       )
     );
-
-    for (let i = 0; i < this._initialAnimalCount; i++) {
-      const sheep = new Sheep();
-      sheep.relocate(
-        EntityManager.randomIntFromInterval(
-          source.spawner.animals.x,
-          source.spawner.animals.x + source.spawner.animals.width - sheep.width
-        ),
-        EntityManager.randomIntFromInterval(
-          source.spawner.animals.y,
-          source.spawner.animals.y +
-            source.spawner.animals.height -
-            sheep.height
-        )
-      );
-      this._sheepList.push(sheep);
-    }
-
-    for (let i = 0; i < this._initialEnemyCount; i++) {
-      const wolf = new Wolf();
-      wolf.relocate(
-        EntityManager.randomIntFromInterval(
-          source.spawner.enemies.x,
-          source.spawner.enemies.x + source.spawner.enemies.width - wolf.width
-        ),
-        EntityManager.randomIntFromInterval(
-          source.spawner.enemies.y,
-          source.spawner.enemies.y + source.spawner.enemies.height - wolf.height
-        )
-      );
-      this._wolves.push(wolf);
-    }
 
     return true;
   }
@@ -275,29 +281,70 @@ export class EntityManager {
     }
   }
 
-  public invoke(type: InvokableEntity): string {
-    if (type == "sheep") {
-      const sheep = new Sheep();
-      this._sheepList.push(sheep);
-      return sheep.id;
+  public bulkInvoke(data: InvokeEntityData[]): boolean {
+    let result = true;
+    for (let i = 0; i < data.length; i++) {
+      let success = this._invoke(data[i]);
+      result = result && success;
+    }
+    return result;
+  }
+
+  public clearAllEntities(): void {
+    this._sheepList = [];
+    this._wolves = [];
+  }
+
+  private _invoke(data: InvokeEntityData): boolean {
+    if (data.amount <= 0) {
+      return false;
+    }
+    if (data.type == "sheep") {
+      if (data.clearQueue) {
+        this._sheepList = [];
+      }
+      for (let i = 0; i < data.amount; i++) {
+        const sheep = new Sheep();
+        sheep.relocate(
+          EntityManager.randomIntFromInterval(
+            this._animalSpawner.x,
+            this._animalSpawner.x + this._animalSpawner.width - sheep.width
+          ),
+          EntityManager.randomIntFromInterval(
+            this._animalSpawner.y,
+            this._animalSpawner.y + this._animalSpawner.height - sheep.height
+          )
+        );
+        this._sheepList.push(sheep);
+      }
+      return true;
     }
 
-    if (type == "wolf") {
-      const wolf = new Wolf();
-      this._wolves.push(wolf);
-      return wolf.id;
-    }
-
-    if (type == "wall") {
-      const wall = new Wall();
-      this._obstacules.push(wall);
-      return wall.id;
+    if (data.type == "wolf") {
+      if (data.clearQueue) {
+        this._wolves = [];
+      }
+      for (let i = 0; i < data.amount; i++) {
+        const wolf = new Wolf();
+        wolf.relocate(
+          EntityManager.randomIntFromInterval(
+            this._enemySpawner.x,
+            this._enemySpawner.x + this._enemySpawner.width - wolf.width
+          ),
+          EntityManager.randomIntFromInterval(
+            this._enemySpawner.y,
+            this._enemySpawner.y + this._enemySpawner.height - wolf.height
+          )
+        );
+        this._wolves.push(wolf);
+      }
+      return true;
     }
 
     console.warn(
-      `It was not possible to invoke an entity of the type ${type}.`
+      `It was not possible to invoke an entity of the type ${data.type}.`
     );
-    return "[Entity not created]";
+    return false;
   }
 
   public get data(): EntityData[] {
@@ -329,7 +376,21 @@ export class EntityManager {
     this._player.captureKey(key, type);
   }
 
-  public step() {
+  public step(): EntityStatusResume {
+    if (!this._player.isAlive) {
+      this._player.revive(
+        EntityManager.randomIntFromInterval(
+          this._playerSpawner.x,
+          this._playerSpawner.x + this._playerSpawner.width - this._player.width
+        ),
+        EntityManager.randomIntFromInterval(
+          this._playerSpawner.y,
+          this._playerSpawner.y +
+            this._playerSpawner.height -
+            this._player.height
+        )
+      );
+    }
     this._player.move([...this._wolves, ...this._obstacules]);
 
     this._sheepList = this._sheepList.filter((sheep) => {
@@ -345,6 +406,12 @@ export class EntityManager {
     this._obstacules.forEach((wall) =>
       wall.checkCollision([...this._wolves, ...this._sheepList, this._player])
     );
+
+    return {
+      animalsAlive: this._sheepList.length,
+      enemiesAlive: this._wolves.length,
+      isPlayerAlive: this._player.isAlive,
+    };
   }
 
   public spawnBullet() {

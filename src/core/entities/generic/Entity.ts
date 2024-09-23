@@ -1,14 +1,11 @@
 export type NoInvokableEntity =
   | "generic"
   | "backgroundActive"
-  | "backgroundInactive";
-export type InvokableEntity =
-  | "sheep"
-  | "wolf"
+  | "backgroundInactive"
   | "bullet"
   | "wall"
-  | "player"
   | "bubble";
+export type InvokableEntity = "sheep" | "wolf" | "player";
 export type EntityType = NoInvokableEntity | InvokableEntity;
 export type KeyEventType = "up" | "down";
 export type availableStatuses =
@@ -175,9 +172,9 @@ export abstract class Entity {
     if (this._status === "freeze" || this._status === "dead") return;
 
     this._x = this._x + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.sin(this._angle);
-    this._y = this._y + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.cos(this._angle 
-               - 2 * ((90 * Math.PI) / 180)); // No recuerdo el porqué de esta parte alch
-                                              // source: https://github.com/GJZ26/HideNSeek/blob/main/src/script/Entities/Player.js#L261
+    this._y = this._y + this._speed * (this._status === "running" ? this._sprintIncrement : 1) * Math.cos(this._angle
+                       - 2 * ((90 * Math.PI) / 180)); // No recuerdo el porqué de esta parte alch
+                                                      // source: https://github.com/GJZ26/HideNSeek/blob/main/src/script/Entities/Player.js#L261
   }
 
   // Ajustar para usarlo en Bots y Jugador

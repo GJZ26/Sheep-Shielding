@@ -1,5 +1,5 @@
 import PerformanceMonitor from "../utils/PerformanceMonitor";
-import { InvokableEntity, NoInvokableEntity } from "./Entity";
+import { InvokableEntity, NoInvokableEntity } from "../entities/generic/Entity";
 
 export interface DisplayInfo {
   x: number;

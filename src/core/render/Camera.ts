@@ -1,4 +1,4 @@
-import { EntityData, EntityType } from "../interfaces/Entity";
+import { EntityData, EntityType } from "../entities/generic/Entity";
 
 /**
  * Calcula las coordenadas para renderizar respecto al objetivo a seguir, sin modificar la coordenada real del mundo
@@ -56,20 +56,21 @@ export class Camera {
           return null;
         }
         // Crear una entidad representativa en el borde de la cámara.
-        const bubbleSize = 15;
+        const bubbleSize = 25;
+        const padding = 5
         const bubble: EntityData = {
           id: entity.id,
           x:
             entity.x > cameraBounds.right
-              ? cameraBounds.right - bubbleSize - xDiference
+              ? cameraBounds.right - bubbleSize - xDiference - padding
               : entity.x < cameraBounds.left - bubbleSize
-              ? cameraBounds.left - xDiference
+              ? cameraBounds.left - xDiference + padding
               : entity.x + entity.width / 2 - xDiference,
           y:
             entity.y > cameraBounds.bottom
-              ? cameraBounds.bottom - bubbleSize - yDiference
+              ? cameraBounds.bottom - bubbleSize - yDiference - padding
               : entity.y < cameraBounds.top - bubbleSize
-              ? cameraBounds.top - yDiference
+              ? cameraBounds.top - yDiference + padding
               : entity.y + entity.height / 2 - yDiference,
           width: bubbleSize,
           height: bubbleSize,

@@ -8,7 +8,7 @@ import {
   EntityData,
   InvokableEntity,
   NoInvokableEntity,
-} from "../interfaces/Entity";
+} from "../entities/generic/Entity";
 
 /**
  * TODO: Cambiar a patrón Singleton

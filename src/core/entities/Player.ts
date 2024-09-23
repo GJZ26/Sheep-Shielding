@@ -5,7 +5,7 @@ import {
   EntityType,
   KeyEventType,
   Position,
-} from "../interfaces/Entity";
+} from "./generic/Entity";
 import { DisplayInfo } from "../interfaces/RenderEngineInterface";
 import { Bullet } from "./Bullet";
 
@@ -22,12 +22,47 @@ export class Player extends Entity {
   protected _status: availableStatuses = "freeze";
   private _maxBullet: number = 10;
   private _bulletsIvoked: Bullet[] = [];
+  private _lastStatus: availableStatuses = this._status;
+
+  private readonly _initialLives = 3;
 
   constructor() {
     super();
+    this._lives = this._initialLives;
+  }
+
+  public revive(x: number, y: number) {
+    this._status = this._lastStatus;
+    this._lives = this._initialLives;
+    this._x = x;
+    this._y = y;
   }
 
   public captureKey(key: string, type: KeyEventType) {
+    if (type == "down" && key == "KeyW") {
+      this._lastStatus = "playing";
+    }
+
+    if (type == "up" && key == "KeyW") {
+      this._lastStatus = "freeze";
+    }
+
+    if (
+      key === "ShiftLeft" &&
+      type == "down" &&
+      this._lastStatus === "playing"
+    ) {
+      this._lastStatus = "running";
+    }
+
+    if (key === "ShiftLeft" && type == "up" && this._lastStatus === "running") {
+      this._lastStatus = "playing";
+    }
+
+    if (!this.isAlive) {
+      return;
+    }
+
     if (type == "down" && key == "KeyW") {
       this._status = "playing";
     }

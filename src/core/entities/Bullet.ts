@@ -1,4 +1,4 @@
-import { availableStatuses, Entity, EntityType } from "../interfaces/Entity";
+import { availableStatuses, Entity, EntityType } from "./generic/Entity";
 
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.
@@ -11,7 +11,7 @@ export class Bullet extends Entity {
   protected _status: availableStatuses = "running";
   private readonly _initial_x: number;
   private readonly _initial_y: number;
-  private _lifeDistance: number = 1000;
+  private _lifeDistance: number = 2000;
   protected _speed: number = 10;
 
   constructor(x: number, y: number, angle: number, relativeSpeed:number) {

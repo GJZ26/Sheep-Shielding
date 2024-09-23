@@ -1,5 +1,5 @@
-import { Entity, EntityType } from "../interfaces/Entity";
-import { Bot } from "../interfaces/Bot";
+import { Entity, EntityType } from "./generic/Entity";
+import { Bot } from "./generic/Bot";
 
 /**
  * PLEASE DO NOT INSTANTIATE THIS CLASS DIRECTLY. USE EntityManager INSTEAD.

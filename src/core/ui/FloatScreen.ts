@@ -42,7 +42,7 @@ export default class FloatScreen {
       rounds: "Rounds",
       timesDeath: "Times dead",
       sheepSaved: "Animals Saved",
-      sheepKilled: "Animals Saved",
+      sheepKilled: "Animals Killed",
       wolfKilled: "Wild Animals Killed",
       timePlayingInSecond: "Time played",
       score: "Score",
@@ -60,6 +60,11 @@ export default class FloatScreen {
           .toString()
           .padStart(2, "0")}`;
       }
+
+      if ((key as keyof MatchResume) === "sheepKilled") {
+        data = Math.floor(data);
+      }
+
       p.innerHTML = `<b>${resumeString[key as keyof MatchResume]}</b>: ${data}`;
       screen.appendChild(p);
     }

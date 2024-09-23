@@ -8,9 +8,10 @@ export abstract class Bot extends Entity {
   protected _entityDistanceStop = 100;
 
   protected _status: availableStatuses = "freeze";
+  protected _calmCountDown: number = 1000 * 5;
+  
   private _targetRotation: number = 0;
   private _lastTimePanicked: number = -1;
-  private _calmCountDown: number = 1000 * 5;
   private _isPanicked: boolean = false;
 
   public think(entity: Entity[]): void {

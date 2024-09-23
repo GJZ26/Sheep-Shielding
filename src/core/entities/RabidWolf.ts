@@ -11,4 +11,6 @@ export class RabidWolf extends Bot {
   protected _speed: number = 6;
   protected _width: number = 106;
   protected _lives: number = 4;
+  protected _calmCountDown: number = 500;
+  protected _attackCountDown: number = 500;
 }

@@ -23,8 +23,8 @@ export class GameManager {
 
   private _currentAnimalAlive = 0;
 
-  private _incrementEnemyByRound = 1;
-  private _incrementAnimalByRound = 0.3;
+  private _incrementEnemyByRound = 1.3;
+  private _incrementAnimalByRound = 0.2;
 
   private _cowSpawnRelation = 0.2;
   private _rabidWolfSpawnRelation = 0.2;

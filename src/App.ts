@@ -59,3 +59,4 @@ startGameButton.onclick = (e) => {
     run(target);
   }
 };
+startGameButton.click()

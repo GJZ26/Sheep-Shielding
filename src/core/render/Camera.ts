@@ -9,6 +9,7 @@ export class Camera {
   private _followingType: EntityType;
 
   constructor(width: number, height: number, following: EntityType) {
+    console.info("🎥 Creating a new camera")
     this._width = width;
     this._height = height;
     this._followingType = following;

@@ -42,6 +42,11 @@ export class EntityManager {
   private _activeBackground: EntityData[] = [];
   private _inactiveBackground: EntityData[] = [];
 
+  constructor() {
+    console.info("🎭 Initializing the entity manager");
+    this._player = new Player();
+  }
+
   private _playerSpawner: Dimension = {
     x: 0,
     y: 0,
@@ -63,11 +68,8 @@ export class EntityManager {
     height: 0,
   };
 
-  constructor() {
-    this._player = new Player();
-  }
-
   public loadMap(source: MapData): boolean {
+    console.info("🔨 Building a map");
     if (
       source.obstacles.length <= 0 ||
       !source.spawner.animals ||
@@ -164,6 +166,7 @@ export class EntityManager {
   }
 
   public static async readMapFromSVG(source: string): Promise<MapData> {
+    console.info("🗺️ Reading map");
     const result: MapData = {
       obstacles: [],
       spawner: {},

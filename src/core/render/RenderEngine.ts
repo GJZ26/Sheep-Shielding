@@ -36,7 +36,7 @@ export default class RenderEngine {
   };
 
   public constructor(options: RenderEngineSettings) {
-    console.log("Inicializando el motor de renderizado");
+    console.info("🖼️ Starting rendering engine");
 
     this._canvasElement = document.createElement("canvas");
     this._performancer = options.performance;
@@ -50,9 +50,13 @@ export default class RenderEngine {
 
     RenderEngine.stylize(this._canvasElement, options.backgroundColor);
 
-    this._loadImages(options.frames).then(() => {
-      console.log("Todas las imágenes se han cargado.");
-    });
+    this._loadImages(options.frames)
+      .then(() => {
+        console.log("✅ Assets loaded");
+      })
+      .catch((error) => {
+        console.warn(error);
+      });
   }
 
   private _loadImages(
@@ -61,12 +65,13 @@ export default class RenderEngine {
       spriteAttribute | undefined
     >
   ) {
+    console.info("📦 Reading assets");
     const imagePromises = Object.entries(frames).map(([key, attribute]) => {
       if (!frames) return;
 
       return new Promise<void>((resolve, reject) => {
         if (!attribute || !attribute.source) {
-          reject(`Error al cargar el frame "${key}".`);
+          reject(`The ${key} assets could not be loaded. The entity may exist and you may be able to interact with it, but it will not be rendered.  To see its outline, run the program to see its outline.`);
           return;
         }
 
@@ -85,12 +90,11 @@ export default class RenderEngine {
             image: image,
             source: attribute.source,
           };
-          
+
           resolve();
         };
 
         image.onerror = () => {
-          console.warn(`Error al cargar el frame "${key}".`);
           resolve();
         };
       });
@@ -112,7 +116,7 @@ export default class RenderEngine {
    * Arranca el bucle de renderizado. Ejecutar dentro del hilo principal ya que necesita acceso al DOM
    */
   public loop(): void {
-    console.log("Starting render loop");
+    console.log("🔄 Starting render loop");
     window.requestAnimationFrame(this._renderFrame.bind(this));
   }
 

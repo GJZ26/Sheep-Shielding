@@ -14,7 +14,7 @@ export interface MatchResume {
   sheepKilled: number;
   wolfKilled: number;
   timePlayingInSecond: number;
-  score: number
+  score: number;
 }
 
 export class GameManager {
@@ -32,6 +32,10 @@ export class GameManager {
   private _startPlayAt: number = Date.now();
 
   private _status: "lost" | "in-progress" = "in-progress";
+
+  constructor() {
+    console.info("🕹️ Creating a new game");
+  }
 
   public invokeCurrentEnemies(clearQueue: boolean): InvokeEntityData[] {
     const result: InvokeEntityData[] = [];
@@ -87,7 +91,7 @@ export class GameManager {
   }
 
   public get resume(): MatchResume {
-    const now = (Date.now() - this._startPlayAt) / 1000
+    const now = (Date.now() - this._startPlayAt) / 1000;
     return {
       rounds: this._roundCount,
       timesDeath: this._timesDeath,
@@ -95,7 +99,11 @@ export class GameManager {
       sheepSaved: this._sheepSaved,
       wolfKilled: this._wolfKilled,
       timePlayingInSecond: now,
-      score: (this._roundCount * 1000) + (this._sheepSaved * 200) + (this._wolfKilled * 100) + (Math.round(now))
+      score:
+        this._roundCount * 1000 +
+        this._sheepSaved * 200 +
+        this._wolfKilled * 100 +
+        Math.round(now),
     };
   }
 }

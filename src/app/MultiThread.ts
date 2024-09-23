@@ -7,117 +7,81 @@ export default function multiThreadRun(target: HTMLElement) {
   const renderEngine = new RenderEngine(GameSetUp);
   renderEngine.loop();
 
-  // Worker initializer
+  const workers = {
+    camera: new Worker(new URL("./.worker/CameraWorker.ts", import.meta.url), { type: "module", name: "Camera" }),
+    entityManager: new Worker(new URL("./.worker/EntityManagerWorker.ts", import.meta.url), { type: "module", name: "Entity Manager" }),
+    gameManager: new Worker(new URL("./.worker/GameManagerWorker.ts", import.meta.url), { type: "module", name: "Game Manager" })
+  };
 
-  const cameraWorker = new Worker(
-    new URL("./.worker/CameraWorker.ts", import.meta.url),
-    { type: "module", name: "Camera" }
-  );
+  const initializeCameraWorker = () => {
+    const dimensions = { width: window.innerWidth - 1, height: window.innerHeight - 1 };
+    workers.camera.postMessage({ type: "resize", dimension: dimensions });
+  };
+  
+  initializeCameraWorker();
 
-  const entityManagerWorker = new Worker(
-    new URL("./.worker/EntityManagerWorker.ts", import.meta.url),
-    { type: "module", name: "Entity Manager" }
-  );
-  const gameManagerWorker = new Worker(
-    new URL("./.worker/GameManagerWorker.ts", import.meta.url),
-    { type: "module", name: "Game Manager" }
-  );
-
-  // Worker Initial Listener
-
-  cameraWorker.postMessage({
-    type: "resize",
-    dimension: { width: window.innerWidth - 1, height: window.innerHeight - 1 },
+  EntityManager.readMapFromSVG("/map.svg").then((map) => {
+    workers.entityManager.postMessage({ type: "loadmap", params: [map] });
+    workers.gameManager.postMessage({ type: "invoke", params: [true] });
   });
 
-  // More ?
+  workers.gameManager.onmessage = (event) => {
+    const { type, params } = event.data;
 
-  EntityManager.readMapFromSVG("/map.svg").then((result) => {
-    entityManagerWorker.postMessage({ type: "loadmap", params: [result] });
-    gameManagerWorker.postMessage({ type: "invoke", params: [true] });
-  });
-
-  gameManagerWorker.onmessage = (event) => {
-    if (event.data.type === "round") {
-      FloatScreen.Notification(
-        target,
-        `Round ${event.data.params[1]}`,
-        "A new round has started!",
-        1500,
-        true
-      );
-      entityManagerWorker.postMessage({
-        type: "bulkInvoke",
-        params: [event.data.params[0]],
-      });
+    if (type === "round") {
+      FloatScreen.Notification(target, `Round ${params[1]}`, "A new round has started!", 1500, true);
+      workers.entityManager.postMessage({ type: "bulkInvoke", params: [params[0]] });
     }
-    if (event.data.type === "lost") {
-      entityManagerWorker.postMessage({ type: "clear", params: [] });
-      FloatScreen.StatisticsScreen(target, event.data.params[0]);
+
+    if (type === "lost") {
+      workers.entityManager.postMessage({ type: "clear", params: [] });
+      FloatScreen.StatisticsScreen(target, params[0]);
     }
   };
 
-  entityManagerWorker.onmessage = (event) => {
-    if (event.data.type === "tick") {
-      cameraWorker.postMessage({
-        type: "renderFrame",
-        params: [event.data.params[0], event.data.params[1]],
-      });
-      gameManagerWorker.postMessage({
-        type: "update",
-        params: [event.data.params[2]],
-      });
+  workers.entityManager.onmessage = (event) => {
+    const { type, params } = event.data;
+
+    if (type === "tick") {
+      workers.camera.postMessage({ type: "renderFrame", params: [params[0], params[1]] });
+      workers.gameManager.postMessage({ type: "update", params: [params[2]] });
     }
-    if (event.data.type === "invoked") {
-      gameManagerWorker.postMessage({ type: "ready", params: [] });
+
+    if (type === "invoked") {
+      workers.gameManager.postMessage({ type: "ready", params: [] });
     }
   };
 
-  cameraWorker.onmessage = (event) => {
+  workers.camera.onmessage = (event) => {
     if (event.data.type === "render") {
       renderEngine.render(event.data.params[0], event.data.params[1]);
     }
   };
 
-  // Event Listeners
-  window.addEventListener("resize", () => {
-    renderEngine.resize(window.innerWidth - 1, window.innerHeight - 1);
-    cameraWorker.postMessage({
-      type: "resize",
-      dimension: {
-        width: window.innerWidth - 1,
-        height: window.innerHeight - 1,
-      },
-    });
-  });
+  
+  const onResize = () => {
+    const dimensions = { width: window.innerWidth - 1, height: window.innerHeight - 1 };
+    renderEngine.resize(dimensions.width, dimensions.height);
+    workers.camera.postMessage({ type: "resize", dimension: dimensions });
+  };
 
-  window.addEventListener("mousemove", (e) => {
-    entityManagerWorker.postMessage({
+  const onMouseMove = (e: MouseEvent) => {
+    workers.entityManager.postMessage({
       type: "mousemove",
       params: [
-        {
-          x: e.clientX,
-          y: e.clientY,
-        },
-        {
-          height: window.innerHeight,
-          width: window.innerWidth,
-          x: 0,
-          y: 0,
-        },
-      ],
+        { x: e.clientX, y: e.clientY },
+        { height: window.innerHeight, width: window.innerWidth, x: 0, y: 0 }
+      ]
     });
-  });
+  };
 
-  window.addEventListener("keydown", (e) => {
-    entityManagerWorker.postMessage({ type: "key", params: [e.code, "down"] });
-  });
+  const onKeyChange = (e: KeyboardEvent, state: string) => {
+    workers.entityManager.postMessage({ type: "key", params: [e.code, state] });
+  };
 
-  window.addEventListener("keyup", (e) => {
-    entityManagerWorker.postMessage({ type: "key", params: [e.code, "up"] });
-  });
-
-  window.addEventListener("click", () => {
-    entityManagerWorker.postMessage({ type: "click", params: undefined });
-  });
+  window.addEventListener("resize", onResize);
+  window.addEventListener("mousemove", onMouseMove);
+  window.addEventListener("keydown", (e) => onKeyChange(e, "down"));
+  window.addEventListener("keyup", (e) => onKeyChange(e, "up"));
+  window.addEventListener("click", () => workers.entityManager.postMessage({ type: "click", params: undefined }));
 }

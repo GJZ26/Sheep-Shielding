@@ -71,7 +71,7 @@ export default class RenderEngine {
 
       return new Promise<void>((resolve, reject) => {
         if (!attribute || !attribute.source) {
-          reject(`The ${key} assets could not be loaded. The entity may exist and you may be able to interact with it, but it will not be rendered.  To see its outline, run the program to see its outline.`);
+          reject(`The asset "${key}" could not be loaded. The entity may exist and you may be able to interact with it, but it will not be possible to render it.  To see its outline, run the program in debug mode to see its outline.`);
           return;
         }
 

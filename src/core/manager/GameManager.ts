@@ -30,11 +30,20 @@ export class GameManager {
   private _sheepKilled = 0;
   private _wolfKilled = 0;
   private _startPlayAt: number = Date.now();
+  private _started: boolean = false;
 
   private _status: "lost" | "in-progress" = "in-progress";
 
   constructor() {
     console.info("🕹️ Creating a new game");
+  }
+
+  public set ready(value: true) {
+    this._started = value;
+  }
+
+  public get round(): number {
+    return this._roundCount;
   }
 
   public invokeCurrentEnemies(clearQueue: boolean): InvokeEntityData[] {
@@ -63,7 +72,7 @@ export class GameManager {
     if (this._status === "lost") return false;
     if (!status.isPlayerAlive) this._timesDeath++;
 
-    if (status.animalsAlive <= 0) {
+    if (status.animalsAlive <= 0 && this._started) {
       this._status = "lost";
       this._sheepKilled += this._initialAnimalCount - this._currentAnimalAlive;
       this._wolfKilled +=

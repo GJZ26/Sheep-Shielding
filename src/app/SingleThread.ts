@@ -5,7 +5,7 @@ import RenderEngine from "../core/render/RenderEngine";
 import FloatScreen from "../core/ui/FloatScreen";
 import GameSetUp from "./.config/GameSetUp";
 
-export default function run(target: HTMLElement) {
+export default function singleThreadRun(target: HTMLElement) {
   const renderEngine = new RenderEngine(GameSetUp);
   const camera = new Camera(
     window.innerWidth - 1,
@@ -19,6 +19,7 @@ export default function run(target: HTMLElement) {
   EntityManager.readMapFromSVG("/map.svg").then((result) => {
     entityManager.loadMap(result);
     entityManager.bulkInvoke(gameManager.invokeCurrentEnemies(true));
+    gameManager.ready = true;
     FloatScreen.Notification(
       target,
       `Round 1`,
@@ -31,10 +32,15 @@ export default function run(target: HTMLElement) {
 
   renderEngine.loop();
   function loop() {
+
     const resume = entityManager.step();
+
     renderEngine.render(camera.capture(entityManager.data), entityManager.size);
+
     const needUpdate = gameManager.updateMatchStatus(resume);
+    
     if (needUpdate) {
+
       if (!gameManager.isLost) {
         entityManager.bulkInvoke(gameManager.invokeCurrentEnemies(false));
         FloatScreen.Notification(
@@ -44,9 +50,12 @@ export default function run(target: HTMLElement) {
           1500,
           true
         );
+        
       } else {
+
         entityManager.clearAllEntities();
         FloatScreen.StatisticsScreen(target, gameManager.resume);
+
       }
     }
     requestAnimationFrame(loop);

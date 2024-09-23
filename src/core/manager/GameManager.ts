@@ -99,9 +99,11 @@ export class GameManager {
    */
   public updateMatchStatus(status: EntityStatusResume): boolean {
     if (this._status === "lost") return false;
+    if (!this._started) return false;
+
     if (!status.isPlayerAlive) this._timesDeath++;
 
-    if (status.animalsAlive <= 0 && this._started) {
+    if (status.animalsAlive <= 0) {
       this._status = "lost";
       this._sheepKilled += this._initialAnimalCount - this._currentAnimalAlive;
       this._wolfKilled +=

@@ -64,7 +64,6 @@ export class GameManager {
       this._sheepKilled += this._initialAnimalCount - this._currentAnimalAlive;
       this._wolfKilled +=
         Math.round(this._initialEnemyCount) - status.enemiesAlive;
-      console.log("You lost!");
       return true;
     }
 

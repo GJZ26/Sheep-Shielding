@@ -85,8 +85,7 @@ export default class RenderEngine {
             image: image,
             source: attribute.source,
           };
-
-          console.log(`Frame "${key}" cargado.`);
+          
           resolve();
         };
 

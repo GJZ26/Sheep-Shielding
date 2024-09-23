@@ -1,4 +1,4 @@
-import main from "./app/SingleThread";
+import run from "./app/SingleThread";
 import FloatScreen from "./core/ui/FloatScreen";
 
 const startGameButton = document.getElementById("startGame");
@@ -44,7 +44,7 @@ startGameButton.onclick = (e) => {
 
   target.innerHTML = "";
 
-  if (window.Worker) {
+  if (!window.Worker) {
     throw new Error("Not implemented");
   } else {
     FloatScreen.Notification(
@@ -56,6 +56,6 @@ startGameButton.onclick = (e) => {
     console.warn(
       "Your browser does not support Web Worker. Launching program in single thread"
     );
-    main(target);
+    run(target);
   }
 };

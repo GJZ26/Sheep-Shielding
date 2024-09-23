@@ -3,64 +3,10 @@ import { GameManager } from "../core/manager/GameManager";
 import { Camera } from "../core/render/Camera";
 import RenderEngine from "../core/render/RenderEngine";
 import FloatScreen from "../core/ui/FloatScreen";
-import PerformanceMonitor from "../core/utils/PerformanceMonitor";
+import GameSetUp from "./.config/GameSetUp";
 
-export default function main(target: HTMLElement) {
-  const renderEngine = new RenderEngine({
-    appTitle: "Sheep Shielding",
-    backgroundColor: "black",
-    target: target,
-    performance: new PerformanceMonitor({
-      fixedTo: 2,
-    }),
-    debug: false,
-    frames: {
-      player: {
-        adjustSize: "none",
-        flipable: true,
-        repeat: false,
-        source: "/player.png",
-      },
-      generic: undefined,
-      bubble: undefined,
-      sheep: {
-        adjustSize: "none",
-        flipable: true,
-        repeat: false,
-        source: "/sheep.png",
-      },
-      wolf: {
-        adjustSize: "both",
-        flipable: true,
-        repeat: false,
-        source: "/wolf.png",
-      },
-      bullet: {
-        adjustSize: "both",
-        flipable: false,
-        repeat: false,
-        source: "/rock.png",
-      },
-      wall: {
-        adjustSize: "none",
-        flipable: false,
-        repeat: true,
-        source: "/rocks.jpg",
-      },
-      backgroundActive: {
-        adjustSize: "none",
-        flipable: false,
-        repeat: true,
-        source: "/grass.png",
-      },
-      backgroundInactive: {
-        adjustSize: "none",
-        flipable: false,
-        repeat: true,
-        source: "/sand.png",
-      },
-    },
-  });
+export default function run(target: HTMLElement) {
+  const renderEngine = new RenderEngine(GameSetUp);
   const camera = new Camera(
     window.innerWidth - 1,
     window.innerHeight - 1,
@@ -73,7 +19,13 @@ export default function main(target: HTMLElement) {
   EntityManager.readMapFromSVG("/map.svg").then((result) => {
     entityManager.loadMap(result);
     entityManager.bulkInvoke(gameManager.invokeCurrentEnemies(true));
-    FloatScreen.Notification(target,`Round 1`, "A new round has started!",1500, true)
+    FloatScreen.Notification(
+      target,
+      `Round 1`,
+      "A new round has started!",
+      1500,
+      true
+    );
     requestAnimationFrame(loop);
   });
 
@@ -85,7 +37,13 @@ export default function main(target: HTMLElement) {
     if (needUpdate) {
       if (!gameManager.isLost) {
         entityManager.bulkInvoke(gameManager.invokeCurrentEnemies(false));
-        FloatScreen.Notification(target,`Round ${gameManager.resume.rounds}`, "A new round has started!",1500, true)
+        FloatScreen.Notification(
+          target,
+          `Round ${gameManager.resume.rounds}`,
+          "A new round has started!",
+          1500,
+          true
+        );
       } else {
         entityManager.clearAllEntities();
         FloatScreen.StatisticsScreen(target, gameManager.resume);
@@ -100,7 +58,6 @@ export default function main(target: HTMLElement) {
   });
 
   window.addEventListener("mousemove", (e) => {
-    // console.log(
     entityManager.followCursorPlayer(
       {
         x: e.clientX,
@@ -113,7 +70,6 @@ export default function main(target: HTMLElement) {
         y: 0,
       }
     );
-    // );
   });
 
   window.addEventListener("keydown", (e) => {

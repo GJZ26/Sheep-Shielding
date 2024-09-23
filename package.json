@@ -3,12 +3,16 @@
   "private": true,
   "version": "1.1.0",
   "type": "module",
+  "homepage": "https://GJZ26.github.io/Sheep-Shielding",
   "scripts": {
     "dev": "vite",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "gh-pages": "^6.1.1",
     "typescript": "^5.5.3",
     "vite": "^5.4.1"
   },

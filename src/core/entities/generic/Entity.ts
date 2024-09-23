@@ -5,7 +5,7 @@ export type NoInvokableEntity =
   | "bullet"
   | "wall"
   | "bubble";
-export type InvokableEntity = "sheep" | "wolf" | "player";
+export type InvokableEntity = "sheep" | "wolf" | "player" | "cow" | "rabidWolf";
 export type EntityType = NoInvokableEntity | InvokableEntity;
 export type KeyEventType = "up" | "down";
 export type availableStatuses =
@@ -45,7 +45,7 @@ export abstract class Entity {
   protected _id: string = "dump";
   protected _x: number = 0;
   protected _y: number = 0;
-  protected _width: number = 51;
+  protected _width: number = 80;
   protected _height: number = 80;
   protected _speed: number = 5;
   protected _sprintIncrement: number = 1.4;
@@ -56,7 +56,10 @@ export abstract class Entity {
   protected _lives: number = 3;
   protected _attackCountDown = 1000;
 
+  protected _initialLives: number = this._lives;
+  protected _regenerationCountDown: number = 1000 * 1;
   private _lastAttack = -1;
+  private _lastRegeneration: number = -1;
 
   constructor(x?: number, y?: number, width?: number, height?: number) {
     this._id = Entity.generateID();
@@ -238,5 +241,13 @@ export abstract class Entity {
       this._y > target._y + target._height; // La entidad 1 está abajo de la entidad 2
 
     return !isNotColliding;
+  }
+
+  protected _regenerate(){
+    const now = Date.now()
+    if(now - this._lastRegeneration > this._regenerationCountDown && this._lives < this._initialLives){
+      this._lives++
+      this._lastRegeneration = now
+    }
   }
 }

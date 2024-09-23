@@ -33,6 +33,8 @@ export default class RenderEngine {
     bubble: undefined,
     backgroundActive: undefined,
     backgroundInactive: undefined,
+    cow: undefined,
+    rabidWolf: undefined,
   };
 
   public constructor(options: RenderEngineSettings) {
@@ -71,7 +73,9 @@ export default class RenderEngine {
 
       return new Promise<void>((resolve, reject) => {
         if (!attribute || !attribute.source) {
-          reject(`The asset "${key}" could not be loaded. The entity may exist and you may be able to interact with it, but it will not be possible to render it.  To see its outline, run the program in debug mode to see its outline.`);
+          reject(
+            `The asset "${key}" could not be loaded. The entity may exist and you may be able to interact with it, but it will not be possible to render it.  To see its outline, run the program in debug mode to see its outline.`
+          );
           return;
         }
 
@@ -223,7 +227,9 @@ export default class RenderEngine {
     if (
       entity.type === "player" ||
       entity.type === "wolf" ||
-      entity.type === "sheep"
+      entity.type === "sheep" ||
+      entity.type === "rabidWolf" ||
+      entity.type === "cow"
     ) {
       this._context.textAlign = "left";
       this._drawText(

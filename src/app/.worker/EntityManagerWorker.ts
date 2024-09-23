@@ -5,32 +5,33 @@ console.info("⚙️ Entity Manager Worker Up");
 const entityManager = new EntityManager();
 
 self.onmessage = (event) => {
-  if (event.data.type === "mousemove") {
-    entityManager.followCursorPlayer(
-      event.data.params[0],
-      event.data.params[1]
-    );
-  }
-  if (event.data.type === "key") {
-    entityManager.captureKey(event.data.params[0], event.data.params[1]);
+  const { type, params } = event.data;
+
+  if (type === "mousemove") {
+    entityManager.followCursorPlayer(params[0], params[1]);
   }
 
-  if (event.data.type === "click") {
+  if (type === "key") {
+    entityManager.captureKey(params[0], params[1]);
+  }
+
+  if (type === "click") {
     entityManager.spawnBullet();
   }
 
-  if (event.data.type === "loadmap") {
-    entityManager.loadMap(event.data.params[0]);
+  if (type === "loadmap") {
+    entityManager.loadMap(params[0]);
   }
 
-  if (event.data.type === "bulkInvoke") {
-    entityManager.bulkInvoke(event.data.params[0]);
+  if (type === "bulkInvoke") {
+    entityManager.bulkInvoke(params[0]);
     self.postMessage({ type: "invoked", params: [] });
   }
 
-  if (event.data.type === "clear") {
+  if (type === "clear") {
     entityManager.clearAllEntities();
   }
+  
 };
 
 function tick() {

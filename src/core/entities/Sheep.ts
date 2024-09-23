@@ -11,5 +11,6 @@ export class Sheep extends Bot {
 
   protected _attack(_target: Entity): void {
     // Sheeps are love!
+    this._regenerate()
   }
 }

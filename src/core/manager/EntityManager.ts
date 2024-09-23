@@ -5,6 +5,9 @@ import { Sheep } from "../entities/Sheep";
 import { Wall } from "../entities/Wall";
 import { Wolf } from "../entities/Wolf";
 import { InvokeEntityData } from "./GameManager";
+import { Cow } from "../entities/Cow";
+import { Bot } from "../entities/generic/Bot";
+import { RabidWolf } from "../entities/RabidWolf";
 
 interface MapData {
   backgroundActive: Dimension[];
@@ -34,8 +37,8 @@ export interface EntityStatusResume {
  * Representa todas las entidades creadas en el mundo
  */
 export class EntityManager {
-  private _sheepList: Sheep[] = [];
-  private _wolves: Wolf[] = [];
+  private _sheepList: Bot[] = [];
+  private _wolves: Bot[] = [];
   private _obstacules: Wall[] = [];
   private _player: Player;
 
@@ -302,33 +305,33 @@ export class EntityManager {
     if (data.amount <= 0) {
       return false;
     }
-    if (data.type == "sheep") {
+    if (data.type == "sheep" || data.type == "cow") {
       if (data.clearQueue) {
         this._sheepList = [];
       }
       for (let i = 0; i < data.amount; i++) {
-        const sheep = new Sheep();
-        sheep.relocate(
+        const animal = data.type === "sheep" ? new Sheep() : new Cow();
+        animal.relocate(
           EntityManager.randomIntFromInterval(
             this._animalSpawner.x,
-            this._animalSpawner.x + this._animalSpawner.width - sheep.width
+            this._animalSpawner.x + this._animalSpawner.width - animal.width
           ),
           EntityManager.randomIntFromInterval(
             this._animalSpawner.y,
-            this._animalSpawner.y + this._animalSpawner.height - sheep.height
+            this._animalSpawner.y + this._animalSpawner.height - animal.height
           )
         );
-        this._sheepList.push(sheep);
+        this._sheepList.push(animal);
       }
       return true;
     }
 
-    if (data.type == "wolf") {
+    if (data.type == "wolf" || data.type == "rabidWolf") {
       if (data.clearQueue) {
         this._wolves = [];
       }
       for (let i = 0; i < data.amount; i++) {
-        const wolf = new Wolf();
+        const wolf = data.type === "wolf" ? new Wolf() : new RabidWolf();
         wolf.relocate(
           EntityManager.randomIntFromInterval(
             this._enemySpawner.x,
@@ -402,7 +405,11 @@ export class EntityManager {
     });
 
     this._wolves = this._wolves.filter((wolf) => {
-      wolf.think(this._sheepList);
+      if (wolf.type === "wolf") {
+        wolf.think(this._sheepList);
+      } else {
+        wolf.think([...this._sheepList, this._player]);
+      }
       return wolf.isAlive;
     });
 

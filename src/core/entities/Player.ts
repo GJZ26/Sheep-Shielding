@@ -23,8 +23,9 @@ export class Player extends Entity {
   private _maxBullet: number = 10;
   private _bulletsIvoked: Bullet[] = [];
   private _lastStatus: availableStatuses = this._status;
+  protected _lives: number = 3;
+  protected _width: number = 51;
 
-  private readonly _initialLives = 3;
 
   constructor() {
     super();

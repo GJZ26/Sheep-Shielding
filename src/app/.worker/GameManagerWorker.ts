@@ -5,18 +5,17 @@ console.info("⚙️ Game Manager Up");
 const gameManager = new GameManager();
 
 self.onmessage = (event) => {
-  if (event.data.type === "invoke") {
+  const { type, params } = event.data;
+
+  if (type === "invoke") {
     self.postMessage({
       type: "round",
-      params: [
-        gameManager.invokeCurrentEnemies(event.data.params[0]),
-        gameManager.round,
-      ],
+      params: [gameManager.invokeCurrentEnemies(params[0]), gameManager.round],
     });
   }
 
-  if (event.data.type === "update") {
-    const needUpdate = gameManager.updateMatchStatus(event.data.params[0]);
+  if (type === "update") {
+    const needUpdate = gameManager.updateMatchStatus(params[0]);
 
     if (needUpdate) {
       if (!gameManager.isLost) {
@@ -30,7 +29,8 @@ self.onmessage = (event) => {
     }
   }
 
-  if (event.data.type === "ready") {
+  if (type === "ready") {
     gameManager.ready = true;
   }
+  
 };

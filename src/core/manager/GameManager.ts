@@ -22,7 +22,12 @@ export class GameManager {
   private _initialEnemyCount = 1;
 
   private _currentAnimalAlive = 0;
+
   private _incrementEnemyByRound = 1;
+  private _incrementAnimalByRound = 0.3;
+
+  private _cowSpawnRelation = 0.2;
+  private _rabidWolfSpawnRelation = 0.2;
 
   private _timesDeath = 0;
   private _roundCount = 1;
@@ -49,16 +54,40 @@ export class GameManager {
   public invokeCurrentEnemies(clearQueue: boolean): InvokeEntityData[] {
     const result: InvokeEntityData[] = [];
 
+    const cowAmount = Math.round(
+      (Math.round(this._initialAnimalCount) - this._currentAnimalAlive) *
+        this._cowSpawnRelation
+    );
+
+    const rabidWolfAmount = Math.round(
+      Math.round(this._initialEnemyCount) * this._rabidWolfSpawnRelation
+    );
+
     result.push({
       type: "sheep",
-      amount: this._initialAnimalCount - this._currentAnimalAlive,
+      amount:
+        Math.round(this._initialAnimalCount) -
+        this._currentAnimalAlive -
+        cowAmount,
       clearQueue: clearQueue,
     });
 
     result.push({
       type: "wolf",
-      amount: Math.round(this._initialEnemyCount),
+      amount: Math.round(this._initialEnemyCount) - rabidWolfAmount,
       clearQueue: clearQueue,
+    });
+
+    result.push({
+      type: "cow",
+      amount: cowAmount,
+      clearQueue: false,
+    });
+
+    result.push({
+      type: "rabidWolf",
+      amount: rabidWolfAmount,
+      clearQueue: false,
     });
 
     return result;
@@ -89,6 +118,7 @@ export class GameManager {
 
       this._currentAnimalAlive = status.animalsAlive;
       this._initialEnemyCount += this._incrementEnemyByRound;
+      this._initialAnimalCount += this._incrementAnimalByRound;
       return true;
     }
 

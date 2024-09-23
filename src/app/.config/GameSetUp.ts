@@ -54,7 +54,19 @@ const GameSetUp: RenderEngineSettings = {
       repeat: true,
       source: "/sand.png",
     },
+    cow: {
+      adjustSize: "none",
+      flipable: true,
+      repeat: false,
+      source: "/cow.png",
+    },
+    rabidWolf: {
+      adjustSize: "none",
+      flipable: true,
+      repeat: false,
+      source: "/rabidWolf.png",
+    },
   },
 };
 
-export default GameSetUp
+export default GameSetUp;
